@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+google-genai
+firebase-admin
+python-dotenv
+elevenlabs
+sounddevice
+SpeechRecognition
+numpy
