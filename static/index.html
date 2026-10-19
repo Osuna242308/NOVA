@@ -1,0 +1,596 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#080d1b">
+  <title>NOVA | Asistente estudiantil</title>
+  <style>
+    :root {
+      --bg: #080d1b;
+      --panel: #10182a;
+      --panel2: #151f35;
+      --line: #26344f;
+      --blue: #5685ff;
+      --text: #edf3ff;
+      --muted: #91a1bd;
+      --green: #4de0ad;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, "Segoe UI", Arial, sans-serif;
+    }
+
+    button, input, textarea { font: inherit; }
+    button { cursor: pointer; }
+
+    .app {
+      display: grid;
+      grid-template-columns: 245px minmax(0, 1fr);
+      min-height: 100vh;
+    }
+
+    aside {
+      padding: 26px 18px;
+      background: #0b1120;
+      border-right: 1px solid var(--line);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 0 0 38px 4px;
+    }
+
+    .logo {
+      width: 43px;
+      height: 43px;
+      display: grid;
+      place-items: center;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #6898ff, #7957ed);
+      font-size: 23px;
+      font-weight: 800;
+      box-shadow: 0 0 28px #5685ff35;
+    }
+
+    .brand h1 { margin: 0; font-size: 22px; letter-spacing: 3px; }
+    .brand small { color: var(--muted); font-size: 10px; }
+
+    .nav-label {
+      margin: 25px 10px 10px;
+      color: #7788a7;
+      font-size: 10px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+
+    .nav {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 13px 12px;
+      margin: 4px 0;
+      border: 1px solid transparent;
+      border-radius: 10px;
+      color: #aebbd2;
+      text-align: left;
+      background: transparent;
+    }
+
+    .nav.active, .nav:hover {
+      color: white;
+      background: #182544;
+      border-color: #2b416c;
+    }
+
+    .side-note {
+      margin-top: 40px;
+      padding: 15px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    main { min-width: 0; padding: 28px clamp(16px, 4vw, 48px); }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding-bottom: 22px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .topbar small, .muted { color: var(--muted); }
+    .status { color: var(--green); font-size: 12px; }
+
+    .welcome { margin: 32px 0 25px; }
+    .welcome h2 { margin: 0 0 10px; font-size: clamp(25px, 4vw, 34px); }
+    .welcome p { color: var(--muted); line-height: 1.6; margin: 0; }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+
+    .card {
+      min-width: 0;
+      padding: 18px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 15px;
+    }
+
+    .card .symbol { font-size: 21px; }
+    .card h3 { font-size: 14px; margin: 14px 0 6px; }
+    .card p { margin: 0; font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: minmax(0, 1.6fr) minmax(210px, 0.8fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .panel {
+      min-width: 0;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+
+    .panel-head {
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .panel-head h3 { margin: 0 0 5px; font-size: 15px; }
+    .panel-head p { margin: 0; color: var(--muted); font-size: 12px; }
+
+    #chat {
+      height: 310px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      padding: 18px;
+    }
+
+    .bubble {
+      max-width: 90%;
+      padding: 12px 14px;
+      border: 1px solid var(--line);
+      background: var(--panel2);
+      border-radius: 12px;
+      font-size: 13px;
+      line-height: 1.65;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+
+    .bubble.user {
+      align-self: flex-end;
+      background: #1c3261;
+      border-color: #304e87;
+    }
+
+    .bubble.bot { align-self: flex-start; }
+
+    .composer {
+      display: flex;
+      gap: 9px;
+      padding: 14px;
+      border-top: 1px solid var(--line);
+    }
+
+    .composer input, .entry {
+      width: 100%;
+      min-width: 0;
+      padding: 12px;
+      color: var(--text);
+      background: #0b1222;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      outline: none;
+    }
+
+    input:focus, textarea:focus { border-color: var(--blue); }
+
+    .primary {
+      padding: 11px 15px;
+      color: white;
+      background: var(--blue);
+      border: 0;
+      border-radius: 10px;
+      font-weight: 600;
+    }
+
+    .primary:disabled { opacity: .5; cursor: wait; }
+
+    .side-content { padding: 16px; }
+    .entry { margin-bottom: 10px; }
+    textarea.entry { resize: vertical; min-height: 85px; }
+
+    .list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .item {
+      display: flex;
+      gap: 9px;
+      align-items: flex-start;
+      padding: 11px;
+      background: #0b1222;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      font-size: 12px;
+      overflow-wrap: anywhere;
+    }
+
+    .item input { accent-color: var(--blue); margin-top: 2px; }
+    .item.done span { color: var(--muted); text-decoration: line-through; }
+    .item span { flex: 1; line-height: 1.5; }
+
+    .delete {
+      color: #ff929e;
+      border: 0;
+      background: transparent;
+      font-size: 15px;
+    }
+
+    .section { display: none; }
+    .section.active { display: block; }
+
+    .empty { color: var(--muted); font-size: 12px; line-height: 1.6; }
+
+    footer { padding: 25px 0 5px; color: #647491; font-size: 11px; text-align: center; }
+
+    @media (max-width: 850px) {
+      .app { grid-template-columns: 1fr; }
+      aside { padding: 15px; border-right: 0; border-bottom: 1px solid var(--line); }
+      .brand { margin: 0 0 12px 4px; }
+      .nav-label, .side-note { display: none; }
+      .navs { display: flex; gap: 5px; overflow-x: auto; }
+      .nav { width: auto; white-space: nowrap; padding: 10px; }
+      main { padding: 20px 15px; }
+    }
+
+    @media (max-width: 600px) {
+      .cards { grid-template-columns: 1fr; }
+      .cards .card { padding: 14px; }
+      .cards .card h3 { margin-top: 7px; }
+      .workspace { grid-template-columns: 1fr; }
+      #chat { height: 350px; }
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+  <aside>
+    <div class="brand">
+      <div class="logo">N</div>
+      <div>
+        <h1>N.O.V.A.</h1>
+        <small>NEURAL OPERATIONS & VIRTUAL ASSISTANT</small>
+      </div>
+    </div>
+
+    <div class="nav-label">Espacio de trabajo</div>
+    <div class="navs">
+      <button class="nav active" data-page="inicio">⌂ Inicio</button>
+      <button class="nav" data-page="asistente">✧ Asistente IA</button>
+      <button class="nav" data-page="tareas">✓ Mis tareas</button>
+      <button class="nav" data-page="notas">▤ Mis notas</button>
+    </div>
+
+    <div class="side-note">
+      <strong style="color:#edf3ff">Tu espacio inteligente</strong><br>
+      Organiza tus actividades, guarda apuntes y utiliza NOVA para resolver tus dudas académicas.
+    </div>
+  </aside>
+
+  <main>
+    <div class="topbar">
+      <div><strong id="pageTitle">Panel de estudiante</strong><br><small>Tu espacio de aprendizaje</small></div>
+      <div class="status">● NOVA ONLINE</div>
+    </div>
+
+    <section class="section active" id="inicio">
+      <div class="welcome">
+        <h2>Aprende más. Organízate mejor.</h2>
+        <p>Bienvenido a NOVA, tu asistente personal para estudiar, organizarte y avanzar en tus proyectos.</p>
+      </div>
+
+      <div class="cards">
+        <div class="card"><div class="symbol">✧</div><h3>Asistente inteligente</h3><p>Pregunta, aprende y trabaja con NOVA.</p></div>
+        <div class="card"><div class="symbol">✓</div><h3>Organiza tus tareas</h3><p>Registra tus pendientes y marca lo que termines.</p></div>
+        <div class="card"><div class="symbol">▤</div><h3>Guarda tus notas</h3><p>Conserva apuntes útiles en este navegador.</p></div>
+      </div>
+
+      <div class="workspace">
+        <div class="panel">
+          <div class="panel-head"><h3>Habla con NOVA</h3><p>Conectado al asistente de tu servidor</p></div>
+          <div id="chat">
+            <div class="bubble bot">¡Hola! Soy NOVA. ¿Qué te gustaría aprender o resolver hoy?</div>
+          </div>
+          <form class="composer" id="chatForm">
+            <input id="message" placeholder="Escribe tu pregunta..." autocomplete="off" required>
+            <button class="primary" id="sendBtn" type="submit">Enviar</button>
+          </form>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head"><h3>Mis pendientes</h3><p>Una cosa a la vez</p></div>
+          <div class="side-content">
+            <form id="quickTaskForm">
+              <input class="entry" id="quickTask" placeholder="Nueva tarea..." required>
+              <button class="primary" type="submit">Agregar tarea</button>
+            </form>
+            <div class="list" id="quickTasks"></div>
+            <button class="nav" data-page="tareas" style="margin-top:10px">Ver todas las tareas →</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="asistente">
+      <div class="welcome"><h2>Asistente IA</h2><p>Conversa con tu NOVA actual. Tus mensajes se procesan en el backend de Render.</p></div>
+      <div class="panel">
+        <div class="panel-head"><h3>Conversación</h3><p>Evita compartir contraseñas o claves privadas.</p></div>
+        <div id="chat2" style="height:390px;overflow-y:auto;display:flex;flex-direction:column;gap:14px;padding:18px">
+          <div class="bubble bot">Estoy listo para ayudarte con tus estudios y proyectos.</div>
+        </div>
+        <form class="composer" id="chatForm2">
+          <input id="message2" placeholder="Escribe tu pregunta..." autocomplete="off" required>
+          <button class="primary" id="sendBtn2" type="submit">Enviar</button>
+        </form>
+      </div>
+    </section>
+
+    <section class="section" id="tareas">
+      <div class="welcome"><h2>Mis tareas</h2><p>Organiza tus entregas, proyectos y actividades.</p></div>
+      <div class="panel">
+        <div class="panel-head"><h3>Lista de pendientes</h3><p>Las tareas se guardan en este navegador.</p></div>
+        <div class="side-content">
+          <form id="taskForm">
+            <input class="entry" id="taskInput" placeholder="¿Qué necesitas hacer?" required>
+            <button class="primary" type="submit">Agregar tarea</button>
+          </form>
+          <div class="list" id="allTasks"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="notas">
+      <div class="welcome"><h2>Mis notas</h2><p>Guarda ideas, apuntes y recordatorios escolares.</p></div>
+      <div class="panel">
+        <div class="panel-head"><h3>Bloc de notas</h3><p>Las notas se guardan en este navegador.</p></div>
+        <div class="side-content">
+          <form id="noteForm">
+            <input class="entry" id="noteTitle" placeholder="Título de la nota" required>
+            <textarea class="entry" id="noteBody" placeholder="Escribe tus apuntes aquí..." required></textarea>
+            <button class="primary" type="submit">Guardar nota</button>
+          </form>
+          <div class="list" id="notesList"></div>
+        </div>
+      </div>
+    </section>
+
+    <footer>N.O.V.A. · Neural Operations & Virtual Assistant</footer>
+  </main>
+</div>
+
+<script>
+  // Si la interfaz se sirve desde el mismo FastAPI, no hace falta cambiar esta URL.
+  const API_URL = "";
+
+  const $ = id => document.getElementById(id);
+  const read = (key, fallback) => {
+    try {
+      const value = JSON.parse(localStorage.getItem(key));
+      return value ?? fallback;
+    } catch { return fallback; }
+  };
+  const save = (key, value) => localStorage.setItem(key, JSON.stringify(value));
+
+  let tasks = read("nova_tasks", []);
+  let notes = read("nova_notes", []);
+
+  document.querySelectorAll(".nav[data-page]").forEach(button => {
+    button.addEventListener("click", () => {
+      const page = button.dataset.page;
+      document.querySelectorAll(".section").forEach(s => s.classList.toggle("active", s.id === page));
+      document.querySelectorAll(".nav[data-page]").forEach(b => b.classList.toggle("active", b === button));
+      $("pageTitle").textContent = {
+        inicio: "Panel de estudiante",
+        asistente: "Asistente IA",
+        tareas: "Mis tareas",
+        notas: "Mis notas"
+      }[page];
+      renderTasks();
+      renderNotes();
+    });
+  });
+
+  function addBubble(container, text, type) {
+    const bubble = document.createElement("div");
+    bubble.className = "bubble " + type;
+    bubble.textContent = text;
+    container.appendChild(bubble);
+    container.scrollTop = container.scrollHeight;
+    return bubble;
+  }
+
+  async function sendMessage(inputId, chatId, buttonId) {
+    const input = $(inputId);
+    const button = $(buttonId);
+    const message = input.value.trim();
+    if (!message || button.disabled) return;
+
+    const chat = $(chatId);
+    addBubble(chat, message, "user");
+    input.value = "";
+    button.disabled = true;
+    button.textContent = "…";
+    const waiting = addBubble(chat, "NOVA está pensando...", "bot");
+
+    try {
+      const response = await fetch(API_URL + "/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mensaje: message })
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.detail || "No se pudo procesar el mensaje.");
+      }
+      waiting.textContent = data.respuesta ?? "NOVA no devolvió una respuesta.";
+    } catch (error) {
+      waiting.textContent = "No pude conectar con NOVA. Comprueba la conexión e inténtalo de nuevo.";
+      console.error(error);
+    } finally {
+      button.disabled = false;
+      button.textContent = "Enviar";
+      input.focus();
+    }
+  }
+
+  $("chatForm").addEventListener("submit", e => {
+    e.preventDefault();
+    sendMessage("message", "chat", "sendBtn");
+  });
+  $("chatForm2").addEventListener("submit", e => {
+    e.preventDefault();
+    sendMessage("message2", "chat2", "sendBtn2");
+  });
+
+  function renderTasks() {
+    ["quickTasks", "allTasks"].forEach(id => {
+      const list = $(id);
+      list.replaceChildren();
+      const subset = id === "quickTasks" ? tasks.slice(0, 4) : tasks;
+      if (!subset.length) {
+        const empty = document.createElement("p");
+        empty.className = "empty";
+        empty.textContent = "Todavía no hay tareas. Agrega tu primera actividad.";
+        list.appendChild(empty);
+      }
+
+      subset.forEach(task => {
+        const item = document.createElement("div");
+        item.className = "item" + (task.done ? " done" : "");
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.checked = task.done;
+        checkbox.setAttribute("aria-label", "Marcar tarea como terminada");
+        checkbox.addEventListener("change", () => {
+          task.done = checkbox.checked;
+          save("nova_tasks", tasks);
+          renderTasks();
+        });
+        const label = document.createElement("span");
+        label.textContent = task.text;
+        const del = document.createElement("button");
+        del.className = "delete";
+        del.textContent = "×";
+        del.setAttribute("aria-label", "Eliminar tarea");
+        del.addEventListener("click", () => {
+          tasks = tasks.filter(t => t.id !== task.id);
+          save("nova_tasks", tasks);
+          renderTasks();
+        });
+        item.append(checkbox, label, del);
+        list.appendChild(item);
+      });
+    });
+  }
+
+  function addTask(text) {
+    tasks.unshift({ id: Date.now() + Math.random(), text, done: false });
+    save("nova_tasks", tasks);
+    renderTasks();
+  }
+
+  $("quickTaskForm").addEventListener("submit", e => {
+    e.preventDefault();
+    addTask($("quickTask").value.trim());
+    $("quickTask").value = "";
+  });
+
+  $("taskForm").addEventListener("submit", e => {
+    e.preventDefault();
+    addTask($("taskInput").value.trim());
+    $("taskInput").value = "";
+  });
+
+  function renderNotes() {
+    const list = $("notesList");
+    list.replaceChildren();
+    if (!notes.length) {
+      const empty = document.createElement("p");
+      empty.className = "empty";
+      empty.textContent = "Todavía no hay notas guardadas.";
+      list.appendChild(empty);
+    }
+    notes.forEach(note => {
+      const item = document.createElement("div");
+      item.className = "item";
+      const content = document.createElement("span");
+      const title = document.createElement("strong");
+      title.textContent = note.title;
+      const body = document.createElement("p");
+      body.style.whiteSpace = "pre-wrap";
+      body.textContent = note.body;
+      content.append(title, body);
+      const del = document.createElement("button");
+      del.className = "delete";
+      del.textContent = "×";
+      del.setAttribute("aria-label", "Eliminar nota");
+      del.addEventListener("click", () => {
+        notes = notes.filter(n => n.id !== note.id);
+        save("nova_notes", notes);
+        renderNotes();
+      });
+      item.append(content, del);
+      list.appendChild(item);
+    });
+  }
+
+  $("noteForm").addEventListener("submit", e => {
+    e.preventDefault();
+    notes.unshift({
+      id: Date.now() + Math.random(),
+      title: $("noteTitle").value.trim(),
+      body: $("noteBody").value.trim()
+    });
+    save("nova_notes", notes);
+    $("noteTitle").value = "";
+    $("noteBody").value = "";
+    renderNotes();
+  });
+
+  renderTasks();
+  renderNotes();
+</script>
+</body>
+</html>
