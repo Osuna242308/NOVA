@@ -3,12 +3,14 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#080d1b">
   <title>NOVA | Asistente estudiantil</title>
+
   <style>
     :root {
       --bg: #080d1b;
+      --sidebar: #0b1120;
       --panel: #10182a;
       --panel2: #151f35;
       --line: #26344f;
@@ -16,6 +18,7 @@
       --text: #edf3ff;
       --muted: #91a1bd;
       --green: #4de0ad;
+      --danger: #ff929e;
     }
 
     * { box-sizing: border-box; }
@@ -38,8 +41,8 @@
     }
 
     aside {
-      padding: 26px 18px;
-      background: #0b1120;
+      padding: 25px 17px;
+      background: var(--sidebar);
       border-right: 1px solid var(--line);
     }
 
@@ -47,7 +50,7 @@
       display: flex;
       align-items: center;
       gap: 12px;
-      margin: 0 0 38px 4px;
+      margin: 0 0 32px 4px;
     }
 
     .logo {
@@ -62,8 +65,16 @@
       box-shadow: 0 0 28px #5685ff35;
     }
 
-    .brand h1 { margin: 0; font-size: 22px; letter-spacing: 3px; }
-    .brand small { color: var(--muted); font-size: 10px; }
+    .brand h1 {
+      margin: 0;
+      font-size: 22px;
+      letter-spacing: 3px;
+    }
+
+    .brand small {
+      color: var(--muted);
+      font-size: 9px;
+    }
 
     .nav-label {
       margin: 25px 10px 10px;
@@ -94,7 +105,7 @@
     }
 
     .side-note {
-      margin-top: 40px;
+      margin-top: 35px;
       padding: 15px;
       background: var(--panel);
       border: 1px solid var(--line);
@@ -104,29 +115,205 @@
       line-height: 1.6;
     }
 
-    main { min-width: 0; padding: 28px clamp(16px, 4vw, 48px); }
+    main {
+      min-width: 0;
+      padding: 26px clamp(15px, 4vw, 45px);
+    }
 
     .topbar {
       display: flex;
       justify-content: space-between;
       align-items: center;
       gap: 12px;
-      padding-bottom: 22px;
+      padding-bottom: 20px;
       border-bottom: 1px solid var(--line);
     }
 
     .topbar small, .muted { color: var(--muted); }
-    .status { color: var(--green); font-size: 12px; }
 
-    .welcome { margin: 32px 0 25px; }
-    .welcome h2 { margin: 0 0 10px; font-size: clamp(25px, 4vw, 34px); }
-    .welcome p { color: var(--muted); line-height: 1.6; margin: 0; }
+    .status {
+      color: var(--green);
+      font-size: 11px;
+      white-space: nowrap;
+    }
+
+    .section { display: none; }
+    .section.active { display: block; }
+
+    .welcome { margin: 30px 0 24px; }
+    .welcome h2 { margin: 0 0 9px; font-size: 30px; }
+    .welcome p { color: var(--muted); line-height: 1.6; }
+
+    /* Núcleo futurista de NOVA */
+
+    .nova-hero {
+      position: relative;
+      isolation: isolate;
+      overflow: hidden;
+      min-height: 360px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 30px 15px;
+      margin: 26px 0 24px;
+      border: 1px solid #273b61;
+      border-radius: 22px;
+      background:
+        radial-gradient(ellipse at center, #18366a70, transparent 60%),
+        linear-gradient(135deg, #0d162b, #090f20 75%);
+    }
+
+    .nova-hero::before,
+    .nova-hero::after {
+      content: "";
+      position: absolute;
+      z-index: -1;
+      width: 280px;
+      height: 280px;
+      border: 1px solid #5685ff35;
+      border-radius: 50%;
+      animation: novaOrbit 18s linear infinite;
+      pointer-events: none;
+    }
+
+    .nova-hero::after {
+      width: 330px;
+      height: 190px;
+      animation-duration: 12s;
+    }
+
+    .nova-core {
+      position: relative;
+      width: 120px;
+      height: 120px;
+      display: grid;
+      place-items: center;
+      margin: 8px 0 23px;
+      border: 1px solid #76a5ff;
+      border-radius: 50%;
+      background: radial-gradient(
+        circle at 35% 30%,
+        #9ed5ff,
+        #477cff 35%,
+        #33258d 70%,
+        #0a1025
+      );
+      box-shadow: 0 0 22px #4b83ff, 0 0 60px #3972ff90,
+        inset 0 0 24px #b7d8ff80;
+      animation: novaPulse 3s ease-in-out infinite;
+    }
+
+    .nova-core::before,
+    .nova-core::after {
+      content: "";
+      position: absolute;
+      inset: -12px;
+      border: 1px solid #6e9dffb0;
+      border-radius: 50%;
+      animation: novaRing 5s linear infinite;
+    }
+
+    .nova-core::after {
+      inset: -22px;
+      border-color: #a78bfa75;
+      animation-direction: reverse;
+      animation-duration: 8s;
+    }
+
+    .nova-core span {
+      color: white;
+      font-size: 34px;
+      font-weight: 800;
+      letter-spacing: 3px;
+      text-shadow: 0 0 15px white;
+    }
+
+    .nova-hero h2 {
+      margin: 7px 0 8px;
+      font-size: clamp(28px, 5vw, 43px);
+      letter-spacing: 7px;
+      text-shadow: 0 0 24px #5685ff80;
+    }
+
+    .nova-hero p {
+      margin: 0;
+      color: #9cb4dd;
+      font-size: 12px;
+      line-height: 1.7;
+    }
+
+    .voice-status {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 18px;
+      color: var(--green);
+      font-size: 10px;
+      letter-spacing: 2px;
+    }
+
+    .voice-bars {
+      height: 25px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      margin-top: 9px;
+    }
+
+    .voice-bars span {
+      width: 3px;
+      height: 5px;
+      border-radius: 5px;
+      background: #6ca5ff;
+      box-shadow: 0 0 8px #5685ff;
+      animation: voiceWave .8s ease-in-out infinite alternate;
+    }
+
+    .voice-bars span:nth-child(3n) { animation-delay: -.5s; }
+    .voice-bars span:nth-child(2n) { animation-delay: -.25s; }
+
+    .voice-bars.listening span {
+      background: #55f3c0;
+      box-shadow: 0 0 10px #55f3c0;
+      animation-duration: .25s;
+    }
+
+    .voice-bars.idle span {
+      animation-play-state: paused;
+      height: 3px;
+    }
+
+    @keyframes novaPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.06); }
+    }
+
+    @keyframes novaRing {
+      from { transform: rotate(0deg) scale(.94); }
+      to { transform: rotate(360deg) scale(1.04); }
+    }
+
+    @keyframes novaOrbit {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes voiceWave {
+      from { height: 4px; }
+      to { height: 22px; }
+    }
+
+    /* Tarjetas y paneles */
 
     .cards {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 14px;
-      margin-bottom: 24px;
+      margin-bottom: 23px;
     }
 
     .card {
@@ -138,13 +325,13 @@
     }
 
     .card .symbol { font-size: 21px; }
-    .card h3 { font-size: 14px; margin: 14px 0 6px; }
-    .card p { margin: 0; font-size: 12px; color: var(--muted); line-height: 1.5; }
+    .card h3 { margin: 13px 0 6px; font-size: 14px; }
+    .card p { margin: 0; font-size: 12px; color: var(--muted); line-height: 1.6; }
 
     .workspace {
       display: grid;
-      grid-template-columns: minmax(0, 1.6fr) minmax(210px, 0.8fr);
-      gap: 18px;
+      grid-template-columns: minmax(0, 1.5fr) minmax(220px, .8fr);
+      gap: 17px;
       align-items: start;
     }
 
@@ -164,13 +351,13 @@
     .panel-head h3 { margin: 0 0 5px; font-size: 15px; }
     .panel-head p { margin: 0; color: var(--muted); font-size: 12px; }
 
-    #chat {
-      height: 310px;
+    #chat, #chat2 {
+      height: 320px;
       overflow-y: auto;
       display: flex;
       flex-direction: column;
-      gap: 14px;
-      padding: 18px;
+      gap: 13px;
+      padding: 17px;
     }
 
     .bubble {
@@ -195,8 +382,8 @@
 
     .composer {
       display: flex;
-      gap: 9px;
-      padding: 14px;
+      gap: 8px;
+      padding: 13px;
       border-top: 1px solid var(--line);
     }
 
@@ -220,13 +407,36 @@
       border: 0;
       border-radius: 10px;
       font-weight: 600;
+      white-space: nowrap;
     }
 
     .primary:disabled { opacity: .5; cursor: wait; }
 
+    .mic-button {
+      flex: 0 0 44px;
+      width: 44px;
+      height: 44px;
+      display: grid;
+      place-items: center;
+      color: #bcd2ff;
+      border: 1px solid #4266a7;
+      border-radius: 12px;
+      background: #172747;
+      font-size: 19px;
+    }
+
+    .mic-button:hover, .mic-button.listening {
+      color: white;
+      background: #2854a0;
+      box-shadow: 0 0 18px #5685ff70;
+    }
+
+    .mic-button.listening { border-color: var(--green); }
+
     .side-content { padding: 16px; }
+
     .entry { margin-bottom: 10px; }
-    textarea.entry { resize: vertical; min-height: 85px; }
+    textarea.entry { resize: vertical; min-height: 95px; }
 
     .list {
       display: flex;
@@ -249,41 +459,54 @@
 
     .item input { accent-color: var(--blue); margin-top: 2px; }
     .item.done span { color: var(--muted); text-decoration: line-through; }
-    .item span { flex: 1; line-height: 1.5; }
+    .item span { flex: 1; line-height: 1.6; }
 
     .delete {
-      color: #ff929e;
+      color: var(--danger);
       border: 0;
       background: transparent;
-      font-size: 15px;
+      font-size: 17px;
     }
-
-    .section { display: none; }
-    .section.active { display: block; }
 
     .empty { color: var(--muted); font-size: 12px; line-height: 1.6; }
-
     footer { padding: 25px 0 5px; color: #647491; font-size: 11px; text-align: center; }
 
-    @media (max-width: 850px) {
-      .app { grid-template-columns: 1fr; }
-      aside { padding: 15px; border-right: 0; border-bottom: 1px solid var(--line); }
-      .brand { margin: 0 0 12px 4px; }
-      .nav-label, .side-note { display: none; }
-      .navs { display: flex; gap: 5px; overflow-x: auto; }
-      .nav { width: auto; white-space: nowrap; padding: 10px; }
-      main { padding: 20px 15px; }
+    @media (max-width: 950px) {
+      .app { grid-template-columns: 210px minmax(0, 1fr); }
+      .workspace { grid-template-columns: 1fr; }
     }
 
-    @media (max-width: 600px) {
+    @media (max-width: 700px) {
+      .app { grid-template-columns: 1fr; }
+      aside {
+        padding: 15px;
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+      .brand { margin: 0 0 12px 4px; }
+      .nav-label, .side-note { display: none; }
+      .navs { display: flex; gap: 4px; overflow-x: auto; }
+      .nav { width: auto; white-space: nowrap; padding: 10px; }
+      main { padding: 18px 13px; }
       .cards { grid-template-columns: 1fr; }
       .cards .card { padding: 14px; }
       .cards .card h3 { margin-top: 7px; }
-      .workspace { grid-template-columns: 1fr; }
-      #chat { height: 350px; }
+      .nova-hero { min-height: 330px; }
+      .composer { gap: 6px; padding: 9px; }
+      .composer input { padding: 10px; }
+      .primary { padding: 10px; }
+      .mic-button { flex-basis: 40px; width: 40px; height: 40px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .nova-core, .nova-core::before, .nova-core::after,
+      .nova-hero::before, .nova-hero::after, .voice-bars span {
+        animation: none;
+      }
     }
   </style>
 </head>
+
 <body>
 <div class="app">
   <aside>
@@ -305,42 +528,80 @@
 
     <div class="side-note">
       <strong style="color:#edf3ff">Tu espacio inteligente</strong><br>
-      Organiza tus actividades, guarda apuntes y utiliza NOVA para resolver tus dudas académicas.
+      Organiza tus actividades, guarda apuntes y utiliza NOVA para estudiar y desarrollar tus proyectos.
     </div>
   </aside>
 
   <main>
     <div class="topbar">
-      <div><strong id="pageTitle">Panel de estudiante</strong><br><small>Tu espacio de aprendizaje</small></div>
-      <div class="status">● NOVA ONLINE</div>
+      <div>
+        <strong id="pageTitle">Panel de estudiante</strong><br>
+        <small>Tu espacio de aprendizaje</small>
+      </div>
+      <div class="status" id="connectionStatus">● COMPROBANDO...</div>
     </div>
 
+    <!-- INICIO -->
     <section class="section active" id="inicio">
-      <div class="welcome">
-        <h2>Aprende más. Organízate mejor.</h2>
-        <p>Bienvenido a NOVA, tu asistente personal para estudiar, organizarte y avanzar en tus proyectos.</p>
+      <div class="nova-hero">
+        <div class="nova-core"><span>N</span></div>
+        <h2>N.O.V.A.</h2>
+        <p>NEURAL OPERATIONS & VIRTUAL ASSISTANT</p>
+
+        <div class="voice-status">
+          <span>●</span>
+          <span id="voiceStatus">SISTEMA EN LÍNEA</span>
+        </div>
+
+        <div class="voice-bars idle" id="voiceBars" aria-hidden="true">
+          <span></span><span></span><span></span><span></span>
+          <span></span><span></span><span></span><span></span>
+          <span></span><span></span><span></span><span></span>
+          <span></span><span></span><span></span>
+        </div>
+
+        <p>Tu inteligencia artificial personal para aprender y crear.</p>
       </div>
 
       <div class="cards">
-        <div class="card"><div class="symbol">✧</div><h3>Asistente inteligente</h3><p>Pregunta, aprende y trabaja con NOVA.</p></div>
-        <div class="card"><div class="symbol">✓</div><h3>Organiza tus tareas</h3><p>Registra tus pendientes y marca lo que termines.</p></div>
-        <div class="card"><div class="symbol">▤</div><h3>Guarda tus notas</h3><p>Conserva apuntes útiles en este navegador.</p></div>
+        <div class="card">
+          <div class="symbol">✧</div>
+          <h3>Asistente inteligente</h3>
+          <p>Pregunta, aprende y trabaja con NOVA.</p>
+        </div>
+        <div class="card">
+          <div class="symbol">✓</div>
+          <h3>Organiza tus tareas</h3>
+          <p>Registra tus pendientes y marca lo que termines.</p>
+        </div>
+        <div class="card">
+          <div class="symbol">▤</div>
+          <h3>Guarda tus notas</h3>
+          <p>Conserva apuntes útiles en este navegador.</p>
+        </div>
       </div>
 
       <div class="workspace">
         <div class="panel">
-          <div class="panel-head"><h3>Habla con NOVA</h3><p>Conectado al asistente de tu servidor</p></div>
+          <div class="panel-head">
+            <h3>Habla con NOVA</h3>
+            <p>Conectado al asistente de tu servidor</p>
+          </div>
           <div id="chat">
             <div class="bubble bot">¡Hola! Soy NOVA. ¿Qué te gustaría aprender o resolver hoy?</div>
           </div>
           <form class="composer" id="chatForm">
-            <input id="message" placeholder="Escribe tu pregunta..." autocomplete="off" required>
+            <input id="message" placeholder="Escribe o habla con NOVA..." autocomplete="off" required>
+            <button class="mic-button" id="micBtn" type="button" title="Hablar" aria-label="Activar micrófono">🎙</button>
             <button class="primary" id="sendBtn" type="submit">Enviar</button>
           </form>
         </div>
 
         <div class="panel">
-          <div class="panel-head"><h3>Mis pendientes</h3><p>Una cosa a la vez</p></div>
+          <div class="panel-head">
+            <h3>Mis pendientes</h3>
+            <p>Una cosa a la vez</p>
+          </div>
           <div class="side-content">
             <form id="quickTaskForm">
               <input class="entry" id="quickTask" placeholder="Nueva tarea..." required>
@@ -353,24 +614,39 @@
       </div>
     </section>
 
+    <!-- ASISTENTE -->
     <section class="section" id="asistente">
-      <div class="welcome"><h2>Asistente IA</h2><p>Conversa con tu NOVA actual. Tus mensajes se procesan en el backend de Render.</p></div>
+      <div class="welcome">
+        <h2>Asistente IA</h2>
+        <p>Conversa con tu NOVA actual. Los mensajes se procesan en el backend de Render.</p>
+      </div>
       <div class="panel">
-        <div class="panel-head"><h3>Conversación</h3><p>Evita compartir contraseñas o claves privadas.</p></div>
-        <div id="chat2" style="height:390px;overflow-y:auto;display:flex;flex-direction:column;gap:14px;padding:18px">
+        <div class="panel-head">
+          <h3>Conversación</h3>
+          <p>No compartas contraseñas ni claves privadas.</p>
+        </div>
+        <div id="chat2">
           <div class="bubble bot">Estoy listo para ayudarte con tus estudios y proyectos.</div>
         </div>
         <form class="composer" id="chatForm2">
-          <input id="message2" placeholder="Escribe tu pregunta..." autocomplete="off" required>
+          <input id="message2" placeholder="Escribe o habla con NOVA..." autocomplete="off" required>
+          <button class="mic-button" id="micBtn2" type="button" title="Hablar" aria-label="Activar micrófono">🎙</button>
           <button class="primary" id="sendBtn2" type="submit">Enviar</button>
         </form>
       </div>
     </section>
 
+    <!-- TAREAS -->
     <section class="section" id="tareas">
-      <div class="welcome"><h2>Mis tareas</h2><p>Organiza tus entregas, proyectos y actividades.</p></div>
+      <div class="welcome">
+        <h2>Mis tareas</h2>
+        <p>Organiza tus entregas, proyectos y actividades.</p>
+      </div>
       <div class="panel">
-        <div class="panel-head"><h3>Lista de pendientes</h3><p>Las tareas se guardan en este navegador.</p></div>
+        <div class="panel-head">
+          <h3>Lista de pendientes</h3>
+          <p>Las tareas se guardan en este navegador.</p>
+        </div>
         <div class="side-content">
           <form id="taskForm">
             <input class="entry" id="taskInput" placeholder="¿Qué necesitas hacer?" required>
@@ -381,10 +657,17 @@
       </div>
     </section>
 
+    <!-- NOTAS -->
     <section class="section" id="notas">
-      <div class="welcome"><h2>Mis notas</h2><p>Guarda ideas, apuntes y recordatorios escolares.</p></div>
+      <div class="welcome">
+        <h2>Mis notas</h2>
+        <p>Guarda ideas, apuntes y recordatorios escolares.</p>
+      </div>
       <div class="panel">
-        <div class="panel-head"><h3>Bloc de notas</h3><p>Las notas se guardan en este navegador.</p></div>
+        <div class="panel-head">
+          <h3>Bloc de notas</h3>
+          <p>Las notas se guardan en este navegador.</p>
+        </div>
         <div class="side-content">
           <form id="noteForm">
             <input class="entry" id="noteTitle" placeholder="Título de la nota" required>
@@ -401,36 +684,65 @@
 </div>
 
 <script>
-  // Si la interfaz se sirve desde el mismo FastAPI, no hace falta cambiar esta URL.
+  // Se utiliza el mismo servidor de FastAPI que entrega esta página.
   const API_URL = "";
 
   const $ = id => document.getElementById(id);
-  const read = (key, fallback) => {
+
+  function read(key, fallback) {
     try {
-      const value = JSON.parse(localStorage.getItem(key));
-      return value ?? fallback;
-    } catch { return fallback; }
-  };
-  const save = (key, value) => localStorage.setItem(key, JSON.stringify(value));
+      return JSON.parse(localStorage.getItem(key)) ?? fallback;
+    } catch {
+      return fallback;
+    }
+  }
+
+  function save(key, value) {
+    try {
+      localStorage.setItem(key, JSON.stringify(value));
+    } catch (error) {
+      console.error("No se pudieron guardar los datos localmente.", error);
+    }
+  }
 
   let tasks = read("nova_tasks", []);
   let notes = read("nova_notes", []);
 
-  document.querySelectorAll(".nav[data-page]").forEach(button => {
+  // Navegación entre las secciones.
+  document.querySelectorAll("[data-page]").forEach(button => {
     button.addEventListener("click", () => {
       const page = button.dataset.page;
-      document.querySelectorAll(".section").forEach(s => s.classList.toggle("active", s.id === page));
-      document.querySelectorAll(".nav[data-page]").forEach(b => b.classList.toggle("active", b === button));
+
+      document.querySelectorAll(".section").forEach(section => {
+        section.classList.toggle("active", section.id === page);
+      });
+
+      document.querySelectorAll(".nav[data-page]").forEach(nav => {
+        nav.classList.toggle("active", nav.dataset.page === page);
+      });
+
       $("pageTitle").textContent = {
         inicio: "Panel de estudiante",
         asistente: "Asistente IA",
         tareas: "Mis tareas",
         notas: "Mis notas"
-      }[page];
+      }[page] || "NOVA";
+
       renderTasks();
       renderNotes();
     });
   });
+
+  // Comprobar que el backend está disponible.
+  async function checkConnection() {
+    try {
+      const response = await fetch(API_URL + "/health");
+      if (!response.ok) throw new Error("Backend no disponible");
+      $("connectionStatus").textContent = "● NOVA EN LÍNEA";
+    } catch {
+      $("connectionStatus").textContent = "● SIN CONEXIÓN";
+    }
+  }
 
   function addBubble(container, text, type) {
     const bubble = document.createElement("div");
@@ -441,17 +753,20 @@
     return bubble;
   }
 
+  // Chat conectado con POST /chat del backend.
   async function sendMessage(inputId, chatId, buttonId) {
     const input = $(inputId);
     const button = $(buttonId);
     const message = input.value.trim();
+
     if (!message || button.disabled) return;
 
     const chat = $(chatId);
     addBubble(chat, message, "user");
     input.value = "";
     button.disabled = true;
-    button.textContent = "…";
+    button.textContent = "...";
+
     const waiting = addBubble(chat, "NOVA está pensando...", "bot");
 
     try {
@@ -460,13 +775,19 @@
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ mensaje: message })
       });
+
       const data = await response.json();
+
       if (!response.ok) {
         throw new Error(data.detail || "No se pudo procesar el mensaje.");
       }
+
       waiting.textContent = data.respuesta ?? "NOVA no devolvió una respuesta.";
+      $("voiceStatus").textContent = "RESPUESTA RECIBIDA";
     } catch (error) {
-      waiting.textContent = "No pude conectar con NOVA. Comprueba la conexión e inténtalo de nuevo.";
+      waiting.textContent =
+        "No pude conectar con NOVA. Comprueba la conexión e inténtalo de nuevo.";
+      $("voiceStatus").textContent = "ERROR DE CONEXIÓN";
       console.error(error);
     } finally {
       button.disabled = false;
@@ -475,20 +796,103 @@
     }
   }
 
-  $("chatForm").addEventListener("submit", e => {
-    e.preventDefault();
+  $("chatForm").addEventListener("submit", event => {
+    event.preventDefault();
     sendMessage("message", "chat", "sendBtn");
   });
-  $("chatForm2").addEventListener("submit", e => {
-    e.preventDefault();
+
+  $("chatForm2").addEventListener("submit", event => {
+    event.preventDefault();
     sendMessage("message2", "chat2", "sendBtn2");
   });
+
+  // Reconocimiento de voz del navegador: transcribe, no envía automáticamente.
+  function activarMicrofono(inputId, buttonId) {
+    const SpeechRecognition =
+      window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    const button = $(buttonId);
+    const input = $(inputId);
+
+    if (!SpeechRecognition) {
+      $("voiceStatus").textContent = "VOZ NO DISPONIBLE";
+      alert("Este navegador no admite reconocimiento de voz. Prueba con Chrome.");
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = "es-MX";
+    recognition.interimResults = true;
+    recognition.continuous = false;
+
+    recognition.onstart = () => {
+      button.classList.add("listening");
+      $("voiceBars").classList.remove("idle");
+      $("voiceBars").classList.add("listening");
+      $("voiceStatus").textContent = "ESCUCHANDO...";
+    };
+
+    recognition.onresult = event => {
+      let text = "";
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        text += event.results[i][0].transcript;
+      }
+      input.value = text;
+    };
+
+    recognition.onerror = event => {
+      $("voiceStatus").textContent =
+        event.error === "not-allowed"
+          ? "PERMISO DE MICRÓFONO DENEGADO"
+          : "ERROR DE RECONOCIMIENTO";
+    };
+
+    recognition.onend = () => {
+      button.classList.remove("listening");
+      $("voiceBars").classList.remove("listening");
+      $("voiceBars").classList.add("idle");
+
+      if ($("voiceStatus").textContent === "ESCUCHANDO...") {
+        $("voiceStatus").textContent = "SISTEMA EN LÍNEA";
+      }
+    };
+
+    try {
+      recognition.start();
+    } catch (error) {
+      console.error(error);
+      $("voiceStatus").textContent = "NO SE PUDO ACTIVAR EL MICRÓFONO";
+    }
+  }
+
+  $("micBtn").addEventListener("click", () => {
+    activarMicrofono("message", "micBtn");
+  });
+
+  $("micBtn2").addEventListener("click", () => {
+    activarMicrofono("message2", "micBtn2");
+  });
+
+  // Tareas: guardadas en el navegador actual.
+  function addTask(text) {
+    if (!text) return;
+    tasks.unshift({
+      id: Date.now() + Math.random(),
+      text,
+      done: false
+    });
+    save("nova_tasks", tasks);
+    renderTasks();
+  }
 
   function renderTasks() {
     ["quickTasks", "allTasks"].forEach(id => {
       const list = $(id);
+      if (!list) return;
       list.replaceChildren();
+
       const subset = id === "quickTasks" ? tasks.slice(0, 4) : tasks;
+
       if (!subset.length) {
         const empty = document.createElement("p");
         empty.className = "empty";
@@ -499,6 +903,7 @@
       subset.forEach(task => {
         const item = document.createElement("div");
         item.className = "item" + (task.done ? " done" : "");
+
         const checkbox = document.createElement("input");
         checkbox.type = "checkbox";
         checkbox.checked = task.done;
@@ -508,8 +913,10 @@
           save("nova_tasks", tasks);
           renderTasks();
         });
+
         const label = document.createElement("span");
         label.textContent = task.text;
+
         const del = document.createElement("button");
         del.className = "delete";
         del.textContent = "×";
@@ -519,49 +926,51 @@
           save("nova_tasks", tasks);
           renderTasks();
         });
+
         item.append(checkbox, label, del);
         list.appendChild(item);
       });
     });
   }
 
-  function addTask(text) {
-    tasks.unshift({ id: Date.now() + Math.random(), text, done: false });
-    save("nova_tasks", tasks);
-    renderTasks();
-  }
-
-  $("quickTaskForm").addEventListener("submit", e => {
-    e.preventDefault();
+  $("quickTaskForm").addEventListener("submit", event => {
+    event.preventDefault();
     addTask($("quickTask").value.trim());
     $("quickTask").value = "";
   });
 
-  $("taskForm").addEventListener("submit", e => {
-    e.preventDefault();
+  $("taskForm").addEventListener("submit", event => {
+    event.preventDefault();
     addTask($("taskInput").value.trim());
     $("taskInput").value = "";
   });
 
+  // Notas: guardadas en el navegador actual.
   function renderNotes() {
     const list = $("notesList");
     list.replaceChildren();
+
     if (!notes.length) {
       const empty = document.createElement("p");
       empty.className = "empty";
       empty.textContent = "Todavía no hay notas guardadas.";
       list.appendChild(empty);
     }
+
     notes.forEach(note => {
       const item = document.createElement("div");
       item.className = "item";
+
       const content = document.createElement("span");
       const title = document.createElement("strong");
       title.textContent = note.title;
+
       const body = document.createElement("p");
       body.style.whiteSpace = "pre-wrap";
       body.textContent = note.body;
+
       content.append(title, body);
+
       const del = document.createElement("button");
       del.className = "delete";
       del.textContent = "×";
@@ -571,18 +980,21 @@
         save("nova_notes", notes);
         renderNotes();
       });
+
       item.append(content, del);
       list.appendChild(item);
     });
   }
 
-  $("noteForm").addEventListener("submit", e => {
-    e.preventDefault();
+  $("noteForm").addEventListener("submit", event => {
+    event.preventDefault();
+
     notes.unshift({
       id: Date.now() + Math.random(),
       title: $("noteTitle").value.trim(),
       body: $("noteBody").value.trim()
     });
+
     save("nova_notes", notes);
     $("noteTitle").value = "";
     $("noteBody").value = "";
@@ -591,6 +1003,8 @@
 
   renderTasks();
   renderNotes();
+  checkConnection();
+  setInterval(checkConnection, 30000);
 </script>
 </body>
 </html>
