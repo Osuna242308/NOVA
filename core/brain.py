@@ -82,6 +82,31 @@ def obtener_chat(uid):
         return _chats_por_usuario[uid]
 
 
+def obtener_chat_con_historial(uid, chat_id):
+    if not uid or not chat_id:
+        raise ValueError("Se requiere el usuario y el ID del chat.")
+
+    mensajes = obtener_mensajes_chat(uid, chat_id)
+
+    chat_usuario = client.chats.create(
+        model="gemini-3.6-flash",
+        config={
+            "system_instruction": INSTRUCCIONES_NOVA
+        },
+        history=[
+            {
+                "role": "user" if m["rol"] == "usuario" else "model",
+                "parts": [{"text": m["contenido"]}],
+            }
+            for m in mensajes
+            if m["rol"] in ("usuario", "nova")
+        ],
+    )
+
+    return chat_usuario
+
+
+
 # =========================================================
 # DETECTAR Y GUARDAR RECUERDOS
 # =========================================================
