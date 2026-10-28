@@ -252,6 +252,26 @@ def procesar_comando(comando, uid, chat_id, tasks=None):
     recuerdos = obtener_recuerdos(uid)
     mensaje_modelo = comando
 
+        tareas_usuario = tasks or []
+
+    tareas_pendientes = [
+        tarea
+        for tarea in tareas_usuario
+        if not tarea.get("done", False)
+    ]
+
+    contexto_tareas = (
+        "\n\nTAREAS DEL USUARIO:\n"
+        + "\n".join(
+            f"- {tarea.get('text', 'Tarea sin nombre')}"
+            for tarea in tareas_pendientes
+        )
+        if tareas_pendientes
+        else "\n\nEl usuario no tiene tareas pendientes."
+    )
+
+    mensaje_modelo += contexto_tareas
+
     if recuerdos:
         contexto = "\n".join(
             f"- {clave}: {valor}"
