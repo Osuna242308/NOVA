@@ -13,6 +13,9 @@ from memory.memory import (
     buscar_recuerdo,
     obtener_recuerdos,
     olvidar_recuerdo,
+    guardar_mensaje_chat,
+    obtener_chats,
+    obtener_mensajes_chat,
 )
 
 # =========================================================
