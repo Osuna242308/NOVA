@@ -178,9 +178,13 @@ def mostrar_memoria(uid):
 # PROCESAR COMANDOS
 # =========================================================
 
-def procesar_comando(comando, uid):
+
+def procesar_comando(comando, uid, chat_id):
     if not uid:
         raise ValueError("No se recibió el UID del usuario.")
+
+    if not chat_id:
+        raise ValueError("No se recibió el ID de la conversación.")
 
     comando = comando.strip()
 
@@ -192,6 +196,8 @@ def procesar_comando(comando, uid):
     # Guardar un recuerdo.
     respuesta_recuerdo = detectar_recuerdo(comando, uid)
     if respuesta_recuerdo:
+        guardar_mensaje_chat(uid, chat_id, "usuario", comando)
+        guardar_mensaje_chat(uid, chat_id, "nova", respuesta_recuerdo)
         return respuesta_recuerdo
 
     # Consultar recuerdos.
@@ -203,7 +209,120 @@ def procesar_comando(comando, uid):
         "qué recuerdas",
         "que recuerdas",
     ):
-        return mostrar_memoria(uid)
+        respuesta = mostrar_memoria(uid)
+        guardar_mensaje_chat(uid, chat_id, "usuario", comando)
+        guardar_mensaje_chat(uid, chat_id, "nova", respuesta)
+        return respuesta
+
+    # Buscar un recuerdo por clave.
+    coincidencia = re.match(
+        r"^(?:busca|buscar|recuerda)\s+(?:el recuerdo\s+)?(.+)$",
+        texto,
+        flags=re.IGNORECASE,
+    )
+
+    if coincidencia:
+        clave = normalizar_clave(coincidencia.group(1))
+        valor = buscar_recuerdo(uid, clave)
+
+        if valor is not None:
+            respuesta = f"Encontré este recuerdo: {valor}"
+            guardar_mensaje_chat(uid, chat_id, "usuario", comando)
+            guardar_mensaje_chat(uid, chat_id, "nova", respuesta)
+            return respuesta
+
+    # Olvidar un recuerdo.
+    coincidencia = re.match(
+        r"^(?:olvida|borrar recuerdo|elimina recuerdo)\s+(.+)$",
+        texto,
+        flags=re.IGNORECASE,
+    )
+
+    if coincidencia:
+        clave = normalizar_clave(coincidencia.group(1))
+        valor = buscar_recuerdo(uid, clave)
+
+        if valor is None:
+            respuesta = "No encontré ese recuerdo en tu cuenta."
+        else:
+            olvidar_recuerdo(uid, clave)
+            respuesta = (
+                f"Listo, eliminé de tu cuenta el recuerdo '{clave}'."
+            )
+
+        guardar_mensaje_chat(uid, chat_id, "usuario", comando)
+        guardar_mensaje_chat(uid, chat_id, "nova", respuesta)
+        return respuesta
+
+    # Recuperar el historial persistente de esta conversación.
+    mensajes = obtener_mensajes_chat(uid, chat_id)
+
+    historial = [
+        {
+            "role": "user" if m["rol"] == "usuario" else "model",
+            "parts": [{"text": m["contenido"]}],
+        }
+        for m in mensajes
+        if m["rol"] in ("usuario", "nova")
+    ]
+
+    # Agregar recuerdos exclusivos del usuario autenticado.
+    recuerdos = obtener_recuerdos(uid)
+    contexto = ""
+
+    if recuerdos:
+        contexto = "\n\nRecuerdos del usuario actual:\n"
+        contexto += "\n".join(
+            f"- {clave}: {valor}"
+            for clave, valor in recuerdos
+        )
+
+    mensaje = comando
+
+    if contexto:
+        mensaje = (
+            "Usa estos recuerdos como contexto del usuario actual. "
+            "No los confundas con información de otras personas."
+            f"{contexto}\n\nMensaje del usuario:\n{comando}"
+        )
+
+    chat_usuario = client.chats.create(
+        model="gemini-3.6-flash",
+        config={
+            "system_instruction": INSTRUCCIONES_NOVA
+        },
+        history=historial,
+    )
+
+    for intento in range(3):
+        try:
+            respuesta_obj = chat_usuario.send_message(mensaje)
+            respuesta = (
+                respuesta_obj.text
+                or "No pude generar una respuesta."
+            )
+
+            # Persistir ambos mensajes en la cuenta y conversación actuales.
+            guardar_mensaje_chat(uid, chat_id, "usuario", comando)
+            guardar_mensaje_chat(uid, chat_id, "nova", respuesta)
+
+            return respuesta
+
+        except Exception as error:
+            mensaje_error = str(error).lower()
+
+            es_temporal = (
+                "503" in mensaje_error
+                or "unavailable" in mensaje_error
+                or "overloaded" in mensaje_error
+            )
+
+            if es_temporal and intento < 2:
+                time.sleep(2 * (intento + 1))
+                continue
+
+            raise
+
 
     # Buscar un recuerdo por clave.
     coincidencia = re.match(
