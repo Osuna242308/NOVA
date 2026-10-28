@@ -75,6 +75,7 @@ if STATIC_DIR.is_dir():
 class Mensaje(BaseModel):
     mensaje: str
     chat_id: str | None = None
+    tasks: list[dict] = []
 
 
 # =========================================================
