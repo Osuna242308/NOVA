@@ -665,19 +665,51 @@ authModeBtn.addEventListener("click",()=>{
   passwordInput.autocomplete=creatingAccount?"new-password":"current-password";
   authMessage.textContent="";
 });
-authForm.addEventListener("submit",async event=>{
+authForm.addEventListener("submit", async event => {
   event.preventDefault();
-  authMessage.textContent="";
+  authMessage.textContent = "";
   setBusy(true);
-  try{
-    if(creatingAccount){
-      await createUserWithEmailAndPassword(auth,emailInput.value.trim(),passwordInput.value);
-    }else{
-      await signInWithEmailAndPassword(auth,emailInput.value.trim(),passwordInput.value);
+
+  try {
+    const email = emailInput.value.trim();
+    const password = passwordInput.value;
+
+    if (creatingAccount) {
+      const credential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+
+      await sendEmailVerification(credential.user);
+
+      authMessage.textContent =
+        "¡Cuenta creada! Te enviamos un correo de confirmación. Revisa tu bandeja de entrada y verifica tu correo antes de iniciar sesión.";
+
+      await signOut(auth);
+
+    } else {
+      const credential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+
+      await reload(credential.user);
+
+      if (!credential.user.emailVerified) {
+        await signOut(auth);
+
+        authMessage.textContent =
+          "Tu correo todavía no está verificado. Revisa tu bandeja de entrada y confirma tu dirección antes de entrar.";
+
+        return;
+      }
     }
-  }catch(error){
+
+  } catch (error) {
     showAuthError(error);
-  }finally{
+  } finally {
     setBusy(false);
   }
 });
