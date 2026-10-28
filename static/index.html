@@ -1,562 +1,102 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#080d1b">
-  <title>NOVA | Asistente estudiantil</title>
-
-  <style>
-    :root {
-      --bg: #080d1b;
-      --sidebar: #0b1120;
-      --panel: #10182a;
-      --panel2: #151f35;
-      --line: #26344f;
-      --blue: #5685ff;
-      --text: #edf3ff;
-      --muted: #91a1bd;
-      --green: #4de0ad;
-      --danger: #ff929e;
-    }
-
-    * { box-sizing: border-box; }
-
-    body {
-      margin: 0;
-      min-height: 100vh;
-      background: var(--bg);
-      color: var(--text);
-      font-family: Inter, "Segoe UI", Arial, sans-serif;
-    }
-
-    button, input, textarea { font: inherit; }
-    button { cursor: pointer; }
-
-    .app {
-      display: grid;
-      grid-template-columns: 245px minmax(0, 1fr);
-      min-height: 100vh;
-    }
-
-    aside {
-      padding: 25px 17px;
-      background: var(--sidebar);
-      border-right: 1px solid var(--line);
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin: 0 0 32px 4px;
-    }
-
-    .logo {
-      width: 43px;
-      height: 43px;
-      display: grid;
-      place-items: center;
-      border-radius: 14px;
-      background: linear-gradient(135deg, #6898ff, #7957ed);
-      font-size: 23px;
-      font-weight: 800;
-      box-shadow: 0 0 28px #5685ff35;
-    }
-
-    .brand h1 {
-      margin: 0;
-      font-size: 22px;
-      letter-spacing: 3px;
-    }
-
-    .brand small {
-      color: var(--muted);
-      font-size: 9px;
-    }
-
-    .nav-label {
-      margin: 25px 10px 10px;
-      color: #7788a7;
-      font-size: 10px;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-    }
-
-    .nav {
-      width: 100%;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 13px 12px;
-      margin: 4px 0;
-      border: 1px solid transparent;
-      border-radius: 10px;
-      color: #aebbd2;
-      text-align: left;
-      background: transparent;
-    }
-
-    .nav.active, .nav:hover {
-      color: white;
-      background: #182544;
-      border-color: #2b416c;
-    }
-
-    .side-note {
-      margin-top: 35px;
-      padding: 15px;
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      color: var(--muted);
-      font-size: 12px;
-      line-height: 1.6;
-    }
-
-    main {
-      min-width: 0;
-      padding: 26px clamp(15px, 4vw, 45px);
-    }
-
-    .topbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      padding-bottom: 20px;
-      border-bottom: 1px solid var(--line);
-    }
-
-    .topbar small, .muted { color: var(--muted); }
-
-    .status {
-      color: var(--green);
-      font-size: 11px;
-      white-space: nowrap;
-    }
-
-    .section { display: none; }
-    .section.active { display: block; }
-
-    .welcome { margin: 30px 0 24px; }
-    .welcome h2 { margin: 0 0 9px; font-size: 30px; }
-    .welcome p { color: var(--muted); line-height: 1.6; }
-
-    /* Núcleo futurista de NOVA */
-
-    .nova-hero {
-      position: relative;
-      isolation: isolate;
-      overflow: hidden;
-      min-height: 360px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding: 30px 15px;
-      margin: 26px 0 24px;
-      border: 1px solid #273b61;
-      border-radius: 22px;
-      background:
-        radial-gradient(ellipse at center, #18366a70, transparent 60%),
-        linear-gradient(135deg, #0d162b, #090f20 75%);
-    }
-
-    .nova-hero::before,
-    .nova-hero::after {
-      content: "";
-      position: absolute;
-      z-index: -1;
-      width: 280px;
-      height: 280px;
-      border: 1px solid #5685ff35;
-      border-radius: 50%;
-      animation: novaOrbit 18s linear infinite;
-      pointer-events: none;
-    }
-
-    .nova-hero::after {
-      width: 330px;
-      height: 190px;
-      animation-duration: 12s;
-    }
-
-    .nova-core {
-      position: relative;
-      width: 120px;
-      height: 120px;
-      display: grid;
-      place-items: center;
-      margin: 8px 0 23px;
-      border: 1px solid #76a5ff;
-      border-radius: 50%;
-      background: radial-gradient(
-        circle at 35% 30%,
-        #9ed5ff,
-        #477cff 35%,
-        #33258d 70%,
-        #0a1025
-      );
-      box-shadow: 0 0 22px #4b83ff, 0 0 60px #3972ff90,
-        inset 0 0 24px #b7d8ff80;
-      animation: novaPulse 3s ease-in-out infinite;
-    }
-
-    .nova-core::before,
-    .nova-core::after {
-      content: "";
-      position: absolute;
-      inset: -12px;
-      border: 1px solid #6e9dffb0;
-      border-radius: 50%;
-      animation: novaRing 5s linear infinite;
-    }
-
-    .nova-core::after {
-      inset: -22px;
-      border-color: #a78bfa75;
-      animation-direction: reverse;
-      animation-duration: 8s;
-    }
-
-    .nova-core span {
-      color: white;
-      font-size: 34px;
-      font-weight: 800;
-      letter-spacing: 3px;
-      text-shadow: 0 0 15px white;
-    }
-
-    .nova-hero h2 {
-      margin: 7px 0 8px;
-      font-size: clamp(28px, 5vw, 43px);
-      letter-spacing: 7px;
-      text-shadow: 0 0 24px #5685ff80;
-    }
-
-    .nova-hero p {
-      margin: 0;
-      color: #9cb4dd;
-      font-size: 12px;
-      line-height: 1.7;
-    }
-
-    .voice-status {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      margin-top: 18px;
-      color: var(--green);
-      font-size: 10px;
-      letter-spacing: 2px;
-    }
-
-    .voice-bars {
-      height: 25px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 4px;
-      margin-top: 9px;
-    }
-
-    .voice-bars span {
-      width: 3px;
-      height: 5px;
-      border-radius: 5px;
-      background: #6ca5ff;
-      box-shadow: 0 0 8px #5685ff;
-      animation: voiceWave .8s ease-in-out infinite alternate;
-    }
-
-    .voice-bars span:nth-child(3n) { animation-delay: -.5s; }
-    .voice-bars span:nth-child(2n) { animation-delay: -.25s; }
-
-    .voice-bars.listening span {
-      background: #55f3c0;
-      box-shadow: 0 0 10px #55f3c0;
-      animation-duration: .25s;
-    }
-
-    .voice-bars.idle span {
-      animation-play-state: paused;
-      height: 3px;
-    }
-
-    @keyframes novaPulse {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.06); }
-    }
-
-    @keyframes novaRing {
-      from { transform: rotate(0deg) scale(.94); }
-      to { transform: rotate(360deg) scale(1.04); }
-    }
-
-    @keyframes novaOrbit {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
-    }
-
-    @keyframes voiceWave {
-      from { height: 4px; }
-      to { height: 22px; }
-    }
-
-    /* Tarjetas y paneles */
-
-    .cards {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 14px;
-      margin-bottom: 23px;
-    }
-
-    .card {
-      min-width: 0;
-      padding: 18px;
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 15px;
-    }
-
-    .card .symbol { font-size: 21px; }
-    .card h3 { margin: 13px 0 6px; font-size: 14px; }
-    .card p { margin: 0; font-size: 12px; color: var(--muted); line-height: 1.6; }
-
-    .workspace {
-      display: grid;
-      grid-template-columns: minmax(0, 1.5fr) minmax(220px, .8fr);
-      gap: 17px;
-      align-items: start;
-    }
-
-    .panel {
-      min-width: 0;
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      overflow: hidden;
-    }
-
-    .panel-head {
-      padding: 18px 20px;
-      border-bottom: 1px solid var(--line);
-    }
-
-    .panel-head h3 { margin: 0 0 5px; font-size: 15px; }
-    .panel-head p { margin: 0; color: var(--muted); font-size: 12px; }
-
-    #chat, #chat2 {
-      height: 320px;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 13px;
-      padding: 17px;
-    }
-
-    .bubble {
-      max-width: 90%;
-      padding: 12px 14px;
-      border: 1px solid var(--line);
-      background: var(--panel2);
-      border-radius: 12px;
-      font-size: 13px;
-      line-height: 1.65;
-      white-space: pre-wrap;
-      overflow-wrap: anywhere;
-    }
-
-    .bubble.user {
-      align-self: flex-end;
-      background: #1c3261;
-      border-color: #304e87;
-    }
-
-    .bubble.bot { align-self: flex-start; }
-
-    .composer {
-      display: flex;
-      gap: 8px;
-      padding: 13px;
-      border-top: 1px solid var(--line);
-    }
-
-    .composer input, .entry {
-      width: 100%;
-      min-width: 0;
-      padding: 12px;
-      color: var(--text);
-      background: #0b1222;
-      border: 1px solid var(--line);
-      border-radius: 10px;
-      outline: none;
-    }
-
-    input:focus, textarea:focus { border-color: var(--blue); }
-
-    .primary {
-      padding: 11px 15px;
-      color: white;
-      background: var(--blue);
-      border: 0;
-      border-radius: 10px;
-      font-weight: 600;
-      white-space: nowrap;
-    }
-
-    .primary:disabled { opacity: .5; cursor: wait; }
-
-    .mic-button {
-      flex: 0 0 44px;
-      width: 44px;
-      height: 44px;
-      display: grid;
-      place-items: center;
-      color: #bcd2ff;
-      border: 1px solid #4266a7;
-      border-radius: 12px;
-      background: #172747;
-      font-size: 19px;
-    }
-
-    .mic-button:hover, .mic-button.listening {
-      color: white;
-      background: #2854a0;
-      box-shadow: 0 0 18px #5685ff70;
-    }
-
-    .mic-button.listening { border-color: var(--green); }
-
-    .side-content { padding: 16px; }
-
-    .entry { margin-bottom: 10px; }
-    textarea.entry { resize: vertical; min-height: 95px; }
-
-    .list {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      margin-top: 12px;
-    }
-
-    .item {
-      display: flex;
-      gap: 9px;
-      align-items: flex-start;
-      padding: 11px;
-      background: #0b1222;
-      border: 1px solid var(--line);
-      border-radius: 10px;
-      font-size: 12px;
-      overflow-wrap: anywhere;
-    }
-
-    .item input { accent-color: var(--blue); margin-top: 2px; }
-    .item.done span { color: var(--muted); text-decoration: line-through; }
-    .item span { flex: 1; line-height: 1.6; }
-
-    .delete {
-      color: var(--danger);
-      border: 0;
-      background: transparent;
-      font-size: 17px;
-    }
-
-    .empty { color: var(--muted); font-size: 12px; line-height: 1.6; }
-    footer { padding: 25px 0 5px; color: #647491; font-size: 11px; text-align: center; }
-
-    @media (max-width: 950px) {
-      .app { grid-template-columns: 210px minmax(0, 1fr); }
-      .workspace { grid-template-columns: 1fr; }
-    }
-
-    @media (max-width: 700px) {
-      .app { grid-template-columns: 1fr; }
-      aside {
-        padding: 15px;
-        border-right: 0;
-        border-bottom: 1px solid var(--line);
-      }
-      .brand { margin: 0 0 12px 4px; }
-      .nav-label, .side-note { display: none; }
-      .navs { display: flex; gap: 4px; overflow-x: auto; }
-      .nav { width: auto; white-space: nowrap; padding: 10px; }
-      main { padding: 18px 13px; }
-      .cards { grid-template-columns: 1fr; }
-      .cards .card { padding: 14px; }
-      .cards .card h3 { margin-top: 7px; }
-      .nova-hero { min-height: 330px; }
-      .composer { gap: 6px; padding: 9px; }
-      .composer input { padding: 10px; }
-      .primary { padding: 10px; }
-      .mic-button { flex-basis: 40px; width: 40px; height: 40px; }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      .nova-core, .nova-core::before, .nova-core::after,
-      .nova-hero::before, .nova-hero::after, .voice-bars span {
-        animation: none;
-      }
-    }
-  
-    /* Acceso a NOVA */
-    .app { visibility: hidden; }
-    .app.auth-ready { visibility: visible; }
-    .auth-overlay {
-      position: fixed; inset: 0; z-index: 9999;
-      display: grid; place-items: center; padding: 20px;
-      background:
-        radial-gradient(ellipse at center, #18366a70, transparent 60%),
-        #080d1b;
-    }
-    .auth-overlay[hidden] { display: none; }
-    .auth-card {
-      width: min(100%, 420px); padding: 30px;
-      border: 1px solid #2b416c; border-radius: 20px;
-      background: #10182a; box-shadow: 0 20px 80px #0008;
-    }
-    .auth-brand { text-align: center; margin-bottom: 24px; }
-    .auth-brand .logo { margin: 0 auto 12px; }
-    .auth-brand h2 { margin: 0 0 7px; letter-spacing: 4px; }
-    .auth-brand p { color: #91a1bd; font-size: 13px; line-height: 1.5; }
-    .auth-card label { display: block; margin: 14px 0 7px; color: #c6d4ee; font-size: 13px; }
-    .auth-card input {
-      width: 100%; padding: 12px; color: #edf3ff;
-      background: #0b1222; border: 1px solid #26344f;
-      border-radius: 10px; outline: none;
-    }
-    .auth-card input:focus { border-color: #5685ff; }
-    .auth-actions { display: grid; gap: 10px; margin-top: 18px; }
-    .auth-actions button { width: 100%; padding: 12px; border-radius: 10px; font-weight: 600; }
-    .auth-google { color: #edf3ff; background: #182544; border: 1px solid #2b416c; }
-    .auth-switch { margin-top: 16px; color: #91a1bd; text-align: center; font-size: 13px; }
-    .auth-switch button { color: #9dbbff; border: 0; background: none; text-decoration: underline; }
-    .auth-message { min-height: 18px; margin: 12px 0 0; color: #ff929e; font-size: 12px; line-height: 1.5; }
-    .account-area { display: flex; align-items: center; gap: 10px; }
-    #accountEmail { max-width: 240px; overflow: hidden; text-overflow: ellipsis; color: #91a1bd; font-size: 12px; }
-    #logoutBtn { padding: 8px 11px; color: #edf3ff; background: #182544; border: 1px solid #2b416c; border-radius: 9px; }
-    @media (max-width: 520px) {
-      .auth-card { padding: 22px; }
-      #accountEmail { max-width: 115px; }
-    }
-
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#080d1b">
+<title>NOVA | Asistente estudiantil</title>
+<style>
+:root{--bg:#080d1b;--sidebar:#0b1120;--panel:#10182a;--panel2:#151f35;--line:#26344f;--blue:#5685ff;--text:#edf3ff;--muted:#91a1bd;--green:#4de0ad;--danger:#ff929e}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:var(--bg);color:var(--text);font-family:Inter,"Segoe UI",Arial,sans-serif}
+button,input,textarea{font:inherit}button{cursor:pointer}
+.app{display:grid;grid-template-columns:245px minmax(0,1fr);min-height:100vh;visibility:hidden}
+.app.auth-ready{visibility:visible}
+aside{padding:25px 17px;background:var(--sidebar);border-right:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:12px;margin:0 0 32px 4px}
+.logo{width:43px;height:43px;display:grid;place-items:center;border-radius:14px;background:linear-gradient(135deg,#6898ff,#7957ed);font-size:23px;font-weight:800;box-shadow:0 0 28px #5685ff35}
+.brand h1{margin:0;font-size:22px;letter-spacing:3px}
+.brand small{color:var(--muted);font-size:9px}
+.nav-label{margin:25px 10px 10px;color:#7788a7;font-size:10px;letter-spacing:1.5px;text-transform:uppercase}
+.nav{width:100%;display:flex;align-items:center;gap:12px;padding:13px 12px;margin:4px 0;border:1px solid transparent;border-radius:10px;color:#aebbd2;text-align:left;background:transparent}
+.nav.active,.nav:hover{color:white;background:#182544;border-color:#2b416c}
+.side-note{margin-top:35px;padding:15px;background:var(--panel);border:1px solid var(--line);border-radius:14px;color:var(--muted);font-size:12px;line-height:1.6}
+main{min-width:0;padding:26px clamp(15px,4vw,45px)}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;padding-bottom:20px;border-bottom:1px solid var(--line)}
+.topbar small,.muted{color:var(--muted)}
+.status{color:var(--green);font-size:11px;white-space:nowrap}
+.section{display:none}.section.active{display:block}
+.welcome{margin:30px 0 24px}.welcome h2{margin:0 0 9px;font-size:30px}.welcome p{color:var(--muted);line-height:1.6}
+.nova-hero{position:relative;isolation:isolate;overflow:hidden;min-height:360px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px 15px;margin:26px 0 24px;border:1px solid #273b61;border-radius:22px;background:radial-gradient(ellipse at center,#18366a70,transparent 60%),linear-gradient(135deg,#0d162b,#090f20 75%)}
+.nova-hero:before,.nova-hero:after{content:"";position:absolute;z-index:-1;width:280px;height:280px;border:1px solid #5685ff35;border-radius:50%;animation:orbit 18s linear infinite;pointer-events:none}
+.nova-hero:after{width:330px;height:190px;animation-duration:12s}
+.nova-core{position:relative;width:120px;height:120px;display:grid;place-items:center;margin:8px 0 23px;border:1px solid #76a5ff;border-radius:50%;background:radial-gradient(circle at 35% 30%,#9ed5ff,#477cff 35%,#33258d 70%,#0a1025);box-shadow:0 0 22px #4b83ff,0 0 60px #3972ff90,inset 0 0 24px #b7d8ff80;animation:pulse 3s ease-in-out infinite}
+.nova-core:before,.nova-core:after{content:"";position:absolute;inset:-12px;border:1px solid #6e9dffb0;border-radius:50%;animation:ring 5s linear infinite}
+.nova-core:after{inset:-22px;border-color:#a78bfa75;animation-direction:reverse;animation-duration:8s}
+.nova-core span{font-size:34px;font-weight:800;letter-spacing:3px;text-shadow:0 0 15px white}
+.nova-hero h2{margin:7px 0 8px;font-size:clamp(28px,5vw,43px);letter-spacing:7px;text-shadow:0 0 24px #5685ff80}
+.nova-hero p{margin:8px 0;color:#9cb4dd;font-size:12px;line-height:1.7}
+.voice-status{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:18px;color:var(--green);font-size:10px;letter-spacing:2px}
+.voice-bars{height:25px;display:flex;align-items:center;justify-content:center;gap:4px;margin-top:9px}
+.voice-bars span{width:3px;height:5px;border-radius:5px;background:#6ca5ff;box-shadow:0 0 8px #5685ff;animation:wave .8s ease-in-out infinite alternate}
+.voice-bars span:nth-child(3n){animation-delay:-.5s}.voice-bars span:nth-child(2n){animation-delay:-.25s}
+.voice-bars.listening span{background:#55f3c0;box-shadow:0 0 10px #55f3c0;animation-duration:.25s}
+.voice-bars.idle span{animation-play-state:paused;height:3px}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+@keyframes ring{to{transform:rotate(360deg) scale(1.04)}}
+@keyframes orbit{to{transform:rotate(360deg)}}
+@keyframes wave{to{height:22px}}
+.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-bottom:23px}
+.card{min-width:0;padding:18px;background:var(--panel);border:1px solid var(--line);border-radius:15px}
+.card .symbol{font-size:21px}.card h3{margin:13px 0 6px;font-size:14px}.card p{margin:0;font-size:12px;color:var(--muted);line-height:1.6}
+.workspace{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(220px,.8fr);gap:17px;align-items:start}
+.panel{min-width:0;background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.panel-head{padding:18px 20px;border-bottom:1px solid var(--line)}
+.panel-head h3{margin:0 0 5px;font-size:15px}.panel-head p{margin:0;color:var(--muted);font-size:12px}
+#chat,#chat2{height:320px;overflow-y:auto;display:flex;flex-direction:column;gap:13px;padding:17px}
+.bubble{max-width:90%;padding:12px 14px;border:1px solid var(--line);background:var(--panel2);border-radius:12px;font-size:13px;line-height:1.65;white-space:pre-wrap;overflow-wrap:anywhere}
+.bubble.user{align-self:flex-end;background:#1c3261;border-color:#304e87}.bubble.bot{align-self:flex-start}
+.composer{display:flex;gap:8px;padding:13px;border-top:1px solid var(--line)}
+.composer input,.entry{width:100%;min-width:0;padding:12px;color:var(--text);background:#0b1222;border:1px solid var(--line);border-radius:10px;outline:none}
+input:focus,textarea:focus{border-color:var(--blue)}
+.primary{padding:11px 15px;color:white;background:var(--blue);border:0;border-radius:10px;font-weight:600;white-space:nowrap}
+.primary:disabled{opacity:.5;cursor:wait}
+.mic-button{flex:0 0 44px;width:44px;height:44px;display:grid;place-items:center;color:#bcd2ff;border:1px solid #4266a7;border-radius:12px;background:#172747;font-size:19px}
+.mic-button:hover,.mic-button.listening{color:white;background:#2854a0;box-shadow:0 0 18px #5685ff70}
+.mic-button.listening{border-color:var(--green)}
+.side-content{padding:16px}.entry{margin-bottom:10px}textarea.entry{resize:vertical;min-height:95px}
+.list{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+.item{display:flex;gap:9px;align-items:flex-start;padding:11px;background:#0b1222;border:1px solid var(--line);border-radius:10px;font-size:12px;overflow-wrap:anywhere}
+.item input{accent-color:var(--blue);margin-top:2px}.item.done span{color:var(--muted);text-decoration:line-through}.item span{flex:1;line-height:1.6}
+.delete{color:var(--danger);border:0;background:transparent;font-size:17px}
+.empty{color:var(--muted);font-size:12px;line-height:1.6}
+footer{padding:25px 0 5px;color:#647491;font-size:11px;text-align:center}
+.account-area{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+#accountEmail{max-width:240px;overflow:hidden;text-overflow:ellipsis;color:var(--muted);font-size:12px}
+#logoutBtn{padding:8px 11px;color:var(--text);background:#182544;border:1px solid #2b416c;border-radius:9px}
+.auth-overlay{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;padding:20px;background:radial-gradient(ellipse at center,#18366a70,transparent 60%),#080d1b}
+.auth-overlay[hidden]{display:none}
+.auth-card{width:min(100%,420px);padding:30px;border:1px solid #2b416c;border-radius:20px;background:#10182a;box-shadow:0 20px 80px #0008}
+.auth-brand{text-align:center;margin-bottom:24px}.auth-brand .logo{margin:0 auto 12px}.auth-brand h2{margin:0 0 7px;letter-spacing:4px}.auth-brand p{color:#91a1bd;font-size:13px;line-height:1.5}
+.auth-card label{display:block;margin:14px 0 7px;color:#c6d4ee;font-size:13px}
+.auth-card input{width:100%;padding:12px;color:#edf3ff;background:#0b1222;border:1px solid #26344f;border-radius:10px;outline:none}
+.auth-card input:focus{border-color:#5685ff}.auth-actions{display:grid;gap:10px;margin-top:18px}
+.auth-actions button{width:100%;padding:12px;border-radius:10px;font-weight:600}
+.auth-google{color:#edf3ff;background:#182544;border:1px solid #2b416c}
+.auth-switch{margin-top:16px;color:#91a1bd;text-align:center;font-size:13px}
+.auth-switch button{color:#9dbbff;border:0;background:none;text-decoration:underline}
+.auth-message{min-height:18px;margin:12px 0 0;color:#ff929e;font-size:12px;line-height:1.5}
+@media(max-width:950px){.app{grid-template-columns:210px minmax(0,1fr)}.workspace{grid-template-columns:1fr}}
+@media(max-width:700px){.app{grid-template-columns:1fr}aside{padding:15px;border-right:0;border-bottom:1px solid var(--line)}.brand{margin:0 0 12px 4px}.nav-label,.side-note{display:none}.navs{display:flex;gap:4px;overflow-x:auto}.nav{width:auto;white-space:nowrap;padding:10px}main{padding:18px 13px}.cards{grid-template-columns:1fr}.cards .card{padding:14px}.cards .card h3{margin-top:7px}.nova-hero{min-height:330px}.composer{gap:6px;padding:9px}.composer input{padding:10px}.primary{padding:10px}.mic-button{flex-basis:40px;width:40px;height:40px}}
+@media(max-width:520px){.auth-card{padding:22px}#accountEmail{max-width:115px}.topbar{align-items:flex-start}.status{white-space:normal}}
+@media(prefers-reduced-motion:reduce){.nova-core,.nova-core:before,.nova-core:after,.nova-hero:before,.nova-hero:after,.voice-bars span{animation:none}}
+</style>
 </head>
-
 <body>
-
 <div class="auth-overlay" id="authOverlay">
   <section class="auth-card" aria-labelledby="authTitle">
-    <div class="auth-brand">
-      <div class="logo">N</div>
-      <h2 id="authTitle">N.O.V.A.</h2>
-      <p>Inicia sesión para entrar a tu espacio de aprendizaje.</p>
-    </div>
+    <div class="auth-brand"><div class="logo">N</div><h2 id="authTitle">N.O.V.A.</h2><p>Inicia sesión para entrar a tu espacio de aprendizaje.</p></div>
     <form id="authForm">
       <label for="authEmail">Correo electrónico</label>
       <input id="authEmail" type="email" autocomplete="email" placeholder="tucorreo@ejemplo.com" required>
@@ -568,688 +108,626 @@
       </div>
       <p class="auth-message" id="authMessage" role="status" aria-live="polite"></p>
     </form>
-    <div class="auth-switch">
-      <span id="authSwitchText">¿No tienes cuenta?</span>
-      <button id="authModeBtn" type="button">Crear cuenta</button>
-    </div>
+    <div class="auth-switch"><span id="authSwitchText">¿No tienes cuenta?</span> <button id="authModeBtn" type="button">Crear cuenta</button></div>
   </section>
 </div>
 
 <div class="app" id="novaApp">
-  <aside>
-    <div class="brand">
-      <div class="logo">N</div>
-      <div>
-        <h1>N.O.V.A.</h1>
-        <small>NEURAL OPERATIONS & VIRTUAL ASSISTANT</small>
-      </div>
+<aside>
+  <div class="brand"><div class="logo">N</div><div><h1>N.O.V.A.</h1><small>NEURAL OPERATIONS & VIRTUAL ASSISTANT</small></div></div>
+  <div class="nav-label">Espacio de trabajo</div>
+  <div class="navs">
+    <button class="nav active" data-page="inicio">⌂ Inicio</button>
+    <button class="nav" data-page="asistente">✧ Asistente IA</button>
+    <button class="nav" data-page="tareas">✓ Mis tareas</button>
+    <button class="nav" data-page="notas">▤ Mis notas</button>
+  </div>
+  <div class="side-note"><strong style="color:#edf3ff">Tu espacio inteligente</strong><br>Organiza tus actividades y apuntes en tu espacio privado de aprendizaje.</div>
+</aside>
+<main>
+  <div class="topbar">
+    <div><strong id="pageTitle">Panel de estudiante</strong><br><small>Tu espacio de aprendizaje</small></div>
+    <div class="account-area"><span id="accountEmail"></span><button id="logoutBtn" type="button">Cerrar sesión</button><div class="status" id="connectionStatus">● COMPROBANDO...</div></div>
+  </div>
+
+  <section class="section active" id="inicio">
+    <div class="nova-hero">
+      <div class="nova-core"><span>N</span></div><h2>N.O.V.A.</h2><p>NEURAL OPERATIONS & VIRTUAL ASSISTANT</p>
+      <div class="voice-status"><span>●</span><span id="voiceStatus">SISTEMA EN LÍNEA</span></div>
+      <div class="voice-bars idle" id="voiceBars" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+      <p>Tu inteligencia artificial personal para aprender y crear.</p>
     </div>
-
-    <div class="nav-label">Espacio de trabajo</div>
-    <div class="navs">
-      <button class="nav active" data-page="inicio">⌂ Inicio</button>
-      <button class="nav" data-page="asistente">✧ Asistente IA</button>
-      <button class="nav" data-page="tareas">✓ Mis tareas</button>
-      <button class="nav" data-page="notas">▤ Mis notas</button>
+    <div class="cards">
+      <div class="card"><div class="symbol">✧</div><h3>Asistente inteligente</h3><p>Pregunta, aprende y trabaja con NOVA.</p></div>
+      <div class="card"><div class="symbol">✓</div><h3>Organiza tus tareas</h3><p>Registra tus pendientes y marca lo que termines.</p></div>
+      <div class="card"><div class="symbol">▤</div><h3>Guarda tus notas</h3><p>Conserva apuntes útiles en este navegador.</p></div>
     </div>
-
-    <div class="side-note">
-      <strong style="color:#edf3ff">Tu espacio inteligente</strong><br>
-      Organiza tus actividades y apuntes en tu espacio privado de aprendizaje.
-    </div>
-  </aside>
-
-  <main>
-    <div class="topbar">
-      <div>
-        <strong id="pageTitle">Panel de estudiante</strong><br>
-        <small>Tu espacio de aprendizaje</small>
-      </div>
-      <div class="account-area">
-        <span id="accountEmail"></span>
-        <button id="logoutBtn" type="button">Cerrar sesión</button>
-        <div class="status" id="connectionStatus">● COMPROBANDO...</div>
-      </div>
-    </div>
-
-    <!-- INICIO -->
-    <section class="section active" id="inicio">
-      <div class="nova-hero">
-        <div class="nova-core"><span>N</span></div>
-        <h2>N.O.V.A.</h2>
-        <p>NEURAL OPERATIONS & VIRTUAL ASSISTANT</p>
-
-        <div class="voice-status">
-          <span>●</span>
-          <span id="voiceStatus">SISTEMA EN LÍNEA</span>
-        </div>
-
-        <div class="voice-bars idle" id="voiceBars" aria-hidden="true">
-          <span></span><span></span><span></span><span></span>
-          <span></span><span></span><span></span><span></span>
-          <span></span><span></span><span></span><span></span>
-          <span></span><span></span><span></span>
-        </div>
-
-        <p>Tu inteligencia artificial personal para aprender y crear.</p>
-      </div>
-
-      <div class="cards">
-        <div class="card">
-          <div class="symbol">✧</div>
-          <h3>Asistente inteligente</h3>
-          <p>Pregunta, aprende y trabaja con NOVA.</p>
-        </div>
-        <div class="card">
-          <div class="symbol">✓</div>
-          <h3>Organiza tus tareas</h3>
-          <p>Registra tus pendientes y marca lo que termines.</p>
-        </div>
-        <div class="card">
-          <div class="symbol">▤</div>
-          <h3>Guarda tus notas</h3>
-          <p>Conserva apuntes útiles en este navegador.</p>
-        </div>
-      </div>
-
-      <div class="workspace">
-        <div class="panel">
-          <div class="panel-head">
-            <h3>Habla con NOVA</h3>
-            <p>Conectado al asistente de tu servidor</p>
-          </div>
-          <div id="chat">
-            <div class="bubble bot">¡Hola! Soy NOVA. ¿Qué te gustaría aprender o resolver hoy?</div>
-          </div>
-          <form class="composer" id="chatForm">
-            <input id="message" placeholder="Escribe o habla con NOVA..." autocomplete="off" required>
-            <button class="mic-button" id="micBtn" type="button" title="Hablar" aria-label="Activar micrófono">🎙</button>
-            <button class="primary" id="sendBtn" type="submit">Enviar</button>
-          </form>
-        </div>
-
-        <div class="panel">
-          <div class="panel-head">
-            <h3>Mis pendientes</h3>
-            <p>Una cosa a la vez</p>
-          </div>
-          <div class="side-content">
-            <form id="quickTaskForm">
-              <input class="entry" id="quickTask" placeholder="Nueva tarea..." required>
-              <button class="primary" type="submit">Agregar tarea</button>
-            </form>
-            <div class="list" id="quickTasks"></div>
-            <button class="nav" data-page="tareas" style="margin-top:10px">Ver todas las tareas →</button>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ASISTENTE -->
-    <section class="section" id="asistente">
-      <div class="welcome">
-        <h2>Asistente IA</h2>
-        <p>Conversa con tu NOVA actual. Los mensajes se procesan en el backend de Render.</p>
+    <div class="workspace">
+      <div class="panel">
+        <div class="panel-head"><h3>Habla con NOVA</h3><p>Conectado al asistente de tu servidor</p></div>
+        <div id="chat"></div>
+        <form class="composer" id="chatForm"><input id="message" placeholder="Escribe o habla con NOVA..." autocomplete="off" required><button class="mic-button" id="micBtn" type="button" title="Hablar" aria-label="Activar micrófono">🎙</button><button class="primary" id="sendBtn" type="submit">Enviar</button></form>
       </div>
       <div class="panel">
-        <div class="panel-head">
-          <h3>Conversación</h3>
-          <p>No compartas contraseñas ni claves privadas.</p>
-        </div>
-        <div id="chat2">
-          <div class="bubble bot">Estoy listo para ayudarte con tus estudios y proyectos.</div>
-        </div>
-        <form class="composer" id="chatForm2">
-          <input id="message2" placeholder="Escribe o habla con NOVA..." autocomplete="off" required>
-          <button class="mic-button" id="micBtn2" type="button" title="Hablar" aria-label="Activar micrófono">🎙</button>
-          <button class="primary" id="sendBtn2" type="submit">Enviar</button>
-        </form>
-      </div>
-    </section>
-
-    <!-- TAREAS -->
-    <section class="section" id="tareas">
-      <div class="welcome">
-        <h2>Mis tareas</h2>
-        <p>Organiza tus entregas, proyectos y actividades.</p>
-      </div>
-      <div class="panel">
-        <div class="panel-head">
-          <h3>Lista de pendientes</h3>
-          <p>Tus tareas se guardan por cuenta en este navegador.</p>
-        </div>
+        <div class="panel-head"><h3>Mis pendientes</h3><p>Una cosa a la vez</p></div>
         <div class="side-content">
-          <form id="taskForm">
-            <input class="entry" id="taskInput" placeholder="¿Qué necesitas hacer?" required>
-            <button class="primary" type="submit">Agregar tarea</button>
-          </form>
-          <div class="list" id="allTasks"></div>
+          <form id="quickTaskForm"><input class="entry" id="quickTask" placeholder="Nueva tarea..." required><button class="primary" type="submit">Agregar tarea</button></form>
+          <div class="list" id="quickTasks"></div><button class="nav" data-page="tareas" style="margin-top:10px">Ver todas las tareas →</button>
         </div>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <!-- NOTAS -->
-    <section class="section" id="notas">
-      <div class="welcome">
-        <h2>Mis notas</h2>
-        <p>Guarda ideas, apuntes y recordatorios escolares.</p>
-      </div>
-      <div class="panel">
-        <div class="panel-head">
-          <h3>Bloc de notas</h3>
-          <p>Tus notas se guardan por cuenta en este navegador.</p>
-        </div>
-        <div class="side-content">
-          <form id="noteForm">
-            <input class="entry" id="noteTitle" placeholder="Título de la nota" required>
-            <textarea class="entry" id="noteBody" placeholder="Escribe tus apuntes aquí..." required></textarea>
-            <button class="primary" type="submit">Guardar nota</button>
-          </form>
-          <div class="list" id="notesList"></div>
-        </div>
-      </div>
-    </section>
+  <section class="section" id="asistente">
+    <div class="welcome"><h2>Asistente IA</h2><p>Conversa con tu NOVA actual. Los mensajes se procesan en el backend de Render.</p></div>
+    <div class="panel"><div class="panel-head"><h3>Conversación</h3><p>No compartas contraseñas ni claves privadas.</p></div>
+      <div id="chat2"></div>
+      <form class="composer" id="chatForm2"><input id="message2" placeholder="Escribe o habla con NOVA..." autocomplete="off" required><button class="mic-button" id="micBtn2" type="button" title="Hablar" aria-label="Activar micrófono">🎙</button><button class="primary" id="sendBtn2" type="submit">Enviar</button></form>
+    </div>
+  </section>
 
-    <footer>N.O.V.A. · Neural Operations & Virtual Assistant</footer>
-  </main>
+  <section class="section" id="tareas">
+    <div class="welcome"><h2>Mis tareas</h2><p>Organiza tus entregas, proyectos y actividades.</p></div>
+    <div class="panel"><div class="panel-head"><h3>Lista de pendientes</h3><p>Tus tareas se guardan por cuenta en este navegador.</p></div><div class="side-content">
+      <form id="taskForm"><input class="entry" id="taskInput" placeholder="¿Qué necesitas hacer?" required><button class="primary" type="submit">Agregar tarea</button></form><div class="list" id="allTasks"></div>
+    </div></div>
+  </section>
+
+  <section class="section" id="notas">
+    <div class="welcome"><h2>Mis notas</h2><p>Guarda ideas, apuntes y recordatorios escolares.</p></div>
+    <div class="panel"><div class="panel-head"><h3>Bloc de notas</h3><p>Tus notas se guardan por cuenta en este navegador.</p></div><div class="side-content">
+      <form id="noteForm"><input class="entry" id="noteTitle" placeholder="Título de la nota" required><textarea class="entry" id="noteBody" placeholder="Escribe tus apuntes aquí..." required></textarea><button class="primary" type="submit">Guardar nota</button></form><div class="list" id="notesList"></div>
+    </div></div>
+  </section>
+  <footer>N.O.V.A. · Neural Operations & Virtual Assistant</footer>
+</main>
 </div>
 
 <script>
-  // Se utiliza el mismo servidor de FastAPI que entrega esta página.
-  const API_URL = "";
+const API_URL = "";
+const $ = id => document.getElementById(id);
 
-  const $ = id => document.getElementById(id);
+function read(key,fallback){
+  try { return JSON.parse(localStorage.getItem(key)) ?? fallback; }
+  catch { return fallback; }
+}
+function save(key,value){
+  try { localStorage.setItem(key,JSON.stringify(value)); }
+  catch(error){ console.error("No se pudieron guardar los datos locales.",error); }
+}
 
-  function read(key, fallback) {
-    try {
-      return JSON.parse(localStorage.getItem(key)) ?? fallback;
-    } catch {
-      return fallback;
-    }
-  }
+let currentUserId=null;
+let tasks=[];
+let notes=[];
+let activeChatId=null;
+let loadingChat=false;
 
-  function save(key, value) {
-    try {
-      localStorage.setItem(key, JSON.stringify(value));
-    } catch (error) {
-      console.error("No se pudieron guardar los datos localmente.", error);
-    }
-  }
+function userStorageKey(key){
+  return currentUserId ? `nova_${currentUserId}_${key}` : null;
+}
+function saveUserData(key,value){
+  const keyName=userStorageKey(key);
+  if(keyName) save(keyName,value);
+}
+function addBubble(containerId,text,type){
+  const container=$(containerId);
+  const bubble=document.createElement("div");
+  bubble.className="bubble "+type;
+  bubble.textContent=text;
+  container.appendChild(bubble);
+  container.scrollTop=container.scrollHeight;
+  return bubble;
+}
+function clearChat(id){ $(id).replaceChildren(); }
+function showWelcomeMessages(){
+  addBubble("chat","¡Hola! Soy NOVA. ¿Qué te gustaría aprender o resolver hoy?","bot");
+  addBubble("chat2","Estoy listo para ayudarte con tus estudios y proyectos.","bot");
+}
+function chatStorageKey(){
+  return userStorageKey("active_chat");
+}
 
-  // Los datos se separan por UID de Firebase para que cada cuenta tenga su propio espacio.
-  let currentUserId = null;
-  let tasks = [];
-  let notes = [];
+async function loadUserData(uid){
+  currentUserId=uid || null;
+  activeChatId=null;
+  clearChat("chat");
+  clearChat("chat2");
 
-  function userStorageKey(key) {
-    if (!currentUserId) return null;
-    return `nova_${currentUserId}_${key}`;
-  }
-
-  function loadUserData(uid) {
-    currentUserId = uid || null;
-    if (!currentUserId) {
-      tasks = [];
-      notes = [];
-    } else {
-      tasks = read(userStorageKey("tasks"), []);
-      notes = read(userStorageKey("notes"), []);
-    }
+  if(!currentUserId){
+    tasks=[];
+    notes=[];
     renderTasks();
     renderNotes();
+    showWelcomeMessages();
+    return;
   }
 
-  // Firebase llama esta función al iniciar/cerrar sesión o cambiar de cuenta.
-  window.novaSetUser = loadUserData;
-  window.novaGetIdToken = async () => {
-    if (typeof window.novaFirebaseGetIdToken !== "function") return null;
-    return window.novaFirebaseGetIdToken();
-  };
+  tasks=read(userStorageKey("tasks"),[]);
+  notes=read(userStorageKey("notes"),[]);
+  renderTasks();
+  renderNotes();
+  await cargarConversacionUsuario();
+}
 
-  function saveUserData(key, value) {
-    const storageKey = userStorageKey(key);
-    if (!storageKey) return;
-    save(storageKey, value);
-  }
+window.novaSetUser=loadUserData;
+window.novaGetIdToken=async()=>{
+  if(typeof window.novaFirebaseGetIdToken!=="function") return null;
+  return window.novaFirebaseGetIdToken();
+};
 
-  // Navegación entre las secciones.
-  document.querySelectorAll("[data-page]").forEach(button => {
-    button.addEventListener("click", () => {
-      const page = button.dataset.page;
+async function cargarConversacionUsuario(){
+  if(!currentUserId || loadingChat) return;
+  loadingChat=true;
 
-      document.querySelectorAll(".section").forEach(section => {
-        section.classList.toggle("active", section.id === page);
-      });
+  try{
+    const uidAtStart=currentUserId;
+    const token=await window.novaGetIdToken();
+    if(!token) return;
 
-      document.querySelectorAll(".nav[data-page]").forEach(nav => {
-        nav.classList.toggle("active", nav.dataset.page === page);
-      });
-
-      $("pageTitle").textContent = {
-        inicio: "Panel de estudiante",
-        asistente: "Asistente IA",
-        tareas: "Mis tareas",
-        notas: "Mis notas"
-      }[page] || "NOVA";
-
-      renderTasks();
-      renderNotes();
+    const response=await fetch(API_URL+"/chats",{
+      headers:{Authorization:`Bearer ${token}`}
     });
-  });
+    if(!response.ok) throw new Error("No se pudieron recuperar las conversaciones.");
 
-  // Comprobar que el backend está disponible.
-  async function checkConnection() {
-    try {
-      const response = await fetch(API_URL + "/health");
-      if (!response.ok) throw new Error("Backend no disponible");
-      $("connectionStatus").textContent = "● NOVA EN LÍNEA";
-    } catch {
-      $("connectionStatus").textContent = "● SIN CONEXIÓN";
-    }
-  }
+    const data=await response.json();
+    if(currentUserId!==uidAtStart) return;
 
-  function addBubble(container, text, type) {
-    const bubble = document.createElement("div");
-    bubble.className = "bubble " + type;
-    bubble.textContent = text;
-    container.appendChild(bubble);
-    container.scrollTop = container.scrollHeight;
-    return bubble;
-  }
+    const chats=Array.isArray(data.chats)?data.chats:[];
+    const key=chatStorageKey();
+    const savedId=key ? localStorage.getItem(key) : null;
+    const savedChat=chats.find(c=>c.id===savedId);
 
-  // Chat conectado con POST /chat del backend.
-  async function sendMessage(inputId, chatId, buttonId) {
-    const input = $(inputId);
-    const button = $(buttonId);
-    const message = input.value.trim();
+    activeChatId=savedChat?.id || chats[0]?.id || null;
 
-    if (!message || button.disabled) return;
+    clearChat("chat");
+    clearChat("chat2");
 
-    const chat = $(chatId);
-    addBubble(chat, message, "user");
-    input.value = "";
-    button.disabled = true;
-    button.textContent = "...";
-
-    const waiting = addBubble(chat, "NOVA está pensando...", "bot");
-
-    try {
-      const token = await window.novaGetIdToken();
-      if (!token) throw new Error("Inicia sesión para conversar con NOVA.");
-
-      const response = await fetch(API_URL + "/chat", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
-        },
-        body: JSON.stringify({ mensaje: message })
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.detail || "No se pudo procesar el mensaje.");
-      }
-
-      waiting.textContent = data.respuesta ?? "NOVA no devolvió una respuesta.";
-      $("voiceStatus").textContent = "RESPUESTA RECIBIDA";
-    } catch (error) {
-      waiting.textContent =
-        "No pude conectar con NOVA. Comprueba la conexión e inténtalo de nuevo.";
-      $("voiceStatus").textContent = "ERROR DE CONEXIÓN";
-      console.error(error);
-    } finally {
-      button.disabled = false;
-      button.textContent = "Enviar";
-      input.focus();
-    }
-  }
-
-  $("chatForm").addEventListener("submit", event => {
-    event.preventDefault();
-    sendMessage("message", "chat", "sendBtn");
-  });
-
-  $("chatForm2").addEventListener("submit", event => {
-    event.preventDefault();
-    sendMessage("message2", "chat2", "sendBtn2");
-  });
-
-  // Reconocimiento de voz del navegador: transcribe, no envía automáticamente.
-  function activarMicrofono(inputId, buttonId) {
-    const SpeechRecognition =
-      window.SpeechRecognition || window.webkitSpeechRecognition;
-
-    const button = $(buttonId);
-    const input = $(inputId);
-
-    if (!SpeechRecognition) {
-      $("voiceStatus").textContent = "VOZ NO DISPONIBLE";
-      alert("Este navegador no admite reconocimiento de voz. Prueba con Chrome.");
+    if(!activeChatId){
+      // No asignar un ID nuevo hasta enviar el primer mensaje.
+      showWelcomeMessages();
       return;
     }
 
-    const recognition = new SpeechRecognition();
-    recognition.lang = "es-MX";
-    recognition.interimResults = true;
-    recognition.continuous = false;
+    if(key) localStorage.setItem(key,activeChatId);
 
-    recognition.onstart = () => {
-      button.classList.add("listening");
-      $("voiceBars").classList.remove("idle");
-      $("voiceBars").classList.add("listening");
-      $("voiceStatus").textContent = "ESCUCHANDO...";
-    };
+    const historyResponse=await fetch(
+      API_URL+"/chats/"+encodeURIComponent(activeChatId)+"/mensajes",
+      {headers:{Authorization:`Bearer ${token}`}
+    });
 
-    recognition.onresult = event => {
-      let text = "";
-      for (let i = event.resultIndex; i < event.results.length; i++) {
-        text += event.results[i][0].transcript;
-      }
-      input.value = text;
-    };
+    if(!historyResponse.ok) throw new Error("No se pudo recuperar el historial.");
+    const historyData=await historyResponse.json();
+    if(currentUserId!==uidAtStart) return;
 
-    recognition.onerror = event => {
-      $("voiceStatus").textContent =
-        event.error === "not-allowed"
-          ? "PERMISO DE MICRÓFONO DENEGADO"
-          : "ERROR DE RECONOCIMIENTO";
-    };
-
-    recognition.onend = () => {
-      button.classList.remove("listening");
-      $("voiceBars").classList.remove("listening");
-      $("voiceBars").classList.add("idle");
-
-      if ($("voiceStatus").textContent === "ESCUCHANDO...") {
-        $("voiceStatus").textContent = "SISTEMA EN LÍNEA";
-      }
-    };
-
-    try {
-      recognition.start();
-    } catch (error) {
-      console.error(error);
-      $("voiceStatus").textContent = "NO SE PUDO ACTIVAR EL MICRÓFONO";
+    const messages=Array.isArray(historyData.mensajes)?historyData.mensajes:[];
+    if(!messages.length){
+      showWelcomeMessages();
+      return;
     }
-  }
 
-  $("micBtn").addEventListener("click", () => {
-    activarMicrofono("message", "micBtn");
-  });
-
-  $("micBtn2").addEventListener("click", () => {
-    activarMicrofono("message2", "micBtn2");
-  });
-
-  // Tareas: guardadas en el navegador actual.
-  function addTask(text) {
-    if (!text) return;
-    tasks.unshift({
-      id: Date.now() + Math.random(),
-      text,
-      done: false
+    messages.forEach(item=>{
+      const role=item.rol==="usuario" || item.rol==="user" ? "user" : "bot";
+      const content=String(item.contenido ?? item.mensaje ?? "");
+      addBubble("chat",content,role);
+      addBubble("chat2",content,role);
     });
-    saveUserData("tasks", tasks);
+  }catch(error){
+    console.error("Error al recuperar conversaciones:",error);
+    if(currentUserId) showWelcomeMessages();
+  }finally{
+    loadingChat=false;
+  }
+}
+
+// Navegación.
+document.querySelectorAll("[data-page]").forEach(button=>{
+  button.addEventListener("click",()=>{
+    const page=button.dataset.page;
+    document.querySelectorAll(".section").forEach(section=>{
+      section.classList.toggle("active",section.id===page);
+    });
+    document.querySelectorAll(".nav[data-page]").forEach(nav=>{
+      nav.classList.toggle("active",nav.dataset.page===page);
+    });
+    $("pageTitle").textContent={
+      inicio:"Panel de estudiante",
+      asistente:"Asistente IA",
+      tareas:"Mis tareas",
+      notas:"Mis notas"
+    }[page] || "NOVA";
     renderTasks();
+    renderNotes();
+  });
+});
+
+async function checkConnection(){
+  try{
+    const response=await fetch(API_URL+"/health");
+    if(!response.ok) throw new Error("Backend no disponible");
+    $("connectionStatus").textContent="● NOVA EN LÍNEA";
+  }catch{
+    $("connectionStatus").textContent="● SIN CONEXIÓN";
+  }
+}
+
+async function sendMessage(inputId,buttonId){
+  const input=$(inputId);
+  const button=$(buttonId);
+  const message=input.value.trim();
+
+  if(!message || button.disabled) return;
+  if(!currentUserId){
+    alert("Inicia sesión para conversar con NOVA.");
+    return;
+  }
+  if(loadingChat){
+    alert("Espera a que termine de cargar tu conversación.");
+    return;
   }
 
-  function renderTasks() {
-    ["quickTasks", "allTasks"].forEach(id => {
-      const list = $(id);
-      if (!list) return;
-      list.replaceChildren();
+  const uidAtStart=currentUserId;
+  if(!activeChatId){
+    activeChatId=crypto.randomUUID();
+    const key=chatStorageKey();
+    if(key) localStorage.setItem(key,activeChatId);
+  }
 
-      const subset = id === "quickTasks" ? tasks.slice(0, 4) : tasks;
+  const chatIdForRequest=activeChatId;
+  input.value="";
+  button.disabled=true;
+  button.textContent="...";
 
-      if (!subset.length) {
-        const empty = document.createElement("p");
-        empty.className = "empty";
-        empty.textContent = "Todavía no hay tareas. Agrega tu primera actividad.";
-        list.appendChild(empty);
-      }
+  addBubble("chat",message,"user");
+  addBubble("chat2",message,"user");
+  const waiting1=addBubble("chat","NOVA está pensando...","bot");
+  const waiting2=addBubble("chat2","NOVA está pensando...","bot");
 
-      subset.forEach(task => {
-        const item = document.createElement("div");
-        item.className = "item" + (task.done ? " done" : "");
+  try{
+    const token=await window.novaGetIdToken();
+    if(!token) throw new Error("Tu sesión expiró. Inicia sesión nuevamente.");
 
-        const checkbox = document.createElement("input");
-        checkbox.type = "checkbox";
-        checkbox.checked = task.done;
-        checkbox.setAttribute("aria-label", "Marcar tarea como terminada");
-        checkbox.addEventListener("change", () => {
-          task.done = checkbox.checked;
-          saveUserData("tasks", tasks);
-          renderTasks();
-        });
-
-        const label = document.createElement("span");
-        label.textContent = task.text;
-
-        const del = document.createElement("button");
-        del.className = "delete";
-        del.textContent = "×";
-        del.setAttribute("aria-label", "Eliminar tarea");
-        del.addEventListener("click", () => {
-          tasks = tasks.filter(t => t.id !== task.id);
-          saveUserData("tasks", tasks);
-          renderTasks();
-        });
-
-        item.append(checkbox, label, del);
-        list.appendChild(item);
-      });
+    const response=await fetch(API_URL+"/chat",{
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json",
+        "Authorization":`Bearer ${token}`
+      },
+      body:JSON.stringify({mensaje:message,chat_id:chatIdForRequest})
     });
+    const data=await response.json();
+
+    if(!response.ok) throw new Error(data.detail || "No se pudo procesar el mensaje.");
+    if(currentUserId!==uidAtStart) return;
+
+    if(data.chat_id){
+      activeChatId=data.chat_id;
+      const key=chatStorageKey();
+      if(key) localStorage.setItem(key,activeChatId);
+    }
+
+    const answer=String(data.respuesta ?? "NOVA no devolvió una respuesta.");
+    waiting1.textContent=answer;
+    waiting2.textContent=answer;
+    $("voiceStatus").textContent="RESPUESTA RECIBIDA";
+  }catch(error){
+    waiting1.textContent=error.message || "No pude conectar con NOVA.";
+    waiting2.textContent=error.message || "No pude conectar con NOVA.";
+    $("voiceStatus").textContent="ERROR DE CONEXIÓN";
+    console.error(error);
+  }finally{
+    button.disabled=false;
+    button.textContent="Enviar";
+    input.focus();
+  }
+}
+
+$("chatForm").addEventListener("submit",event=>{
+  event.preventDefault();
+  sendMessage("message","sendBtn");
+});
+$("chatForm2").addEventListener("submit",event=>{
+  event.preventDefault();
+  sendMessage("message2","sendBtn2");
+});
+
+// Reconocimiento de voz del navegador.
+function activarMicrofono(inputId,buttonId){
+  const SpeechRecognition=window.SpeechRecognition || window.webkitSpeechRecognition;
+  const button=$(buttonId);
+  const input=$(inputId);
+
+  if(!SpeechRecognition){
+    $("voiceStatus").textContent="VOZ NO DISPONIBLE";
+    alert("Este navegador no admite reconocimiento de voz. Prueba con Chrome.");
+    return;
   }
 
-  $("quickTaskForm").addEventListener("submit", event => {
-    event.preventDefault();
-    addTask($("quickTask").value.trim());
-    $("quickTask").value = "";
-  });
+  const recognition=new SpeechRecognition();
+  recognition.lang="es-MX";
+  recognition.interimResults=true;
+  recognition.continuous=false;
 
-  $("taskForm").addEventListener("submit", event => {
-    event.preventDefault();
-    addTask($("taskInput").value.trim());
-    $("taskInput").value = "";
-  });
+  recognition.onstart=()=>{
+    button.classList.add("listening");
+    $("voiceBars").classList.remove("idle");
+    $("voiceBars").classList.add("listening");
+    $("voiceStatus").textContent="ESCUCHANDO...";
+  };
+  recognition.onresult=event=>{
+    let text="";
+    for(let i=event.resultIndex;i<event.results.length;i++){
+      text+=event.results[i][0].transcript;
+    }
+    input.value=text;
+  };
+  recognition.onerror=event=>{
+    $("voiceStatus").textContent=event.error==="not-allowed"
+      ? "PERMISO DE MICRÓFONO DENEGADO":"ERROR DE RECONOCIMIENTO";
+  };
+  recognition.onend=()=>{
+    button.classList.remove("listening");
+    $("voiceBars").classList.remove("listening");
+    $("voiceBars").classList.add("idle");
+    if($("voiceStatus").textContent==="ESCUCHANDO..."){
+      $("voiceStatus").textContent="SISTEMA EN LÍNEA";
+    }
+  };
+  try{ recognition.start(); }
+  catch(error){
+    console.error(error);
+    $("voiceStatus").textContent="NO SE PUDO ACTIVAR EL MICRÓFONO";
+  }
+}
+$("micBtn").addEventListener("click",()=>activarMicrofono("message","micBtn"));
+$("micBtn2").addEventListener("click",()=>activarMicrofono("message2","micBtn2"));
 
-  // Notas: guardadas en el navegador actual.
-  function renderNotes() {
-    const list = $("notesList");
+// Tareas locales separadas por usuario.
+function addTask(text){
+  if(!text || !currentUserId) return;
+  tasks.unshift({id:Date.now()+Math.random(),text,done:false});
+  saveUserData("tasks",tasks);
+  renderTasks();
+}
+function renderTasks(){
+  ["quickTasks","allTasks"].forEach(id=>{
+    const list=$(id);
+    if(!list) return;
     list.replaceChildren();
+    const subset=id==="quickTasks"?tasks.slice(0,4):tasks;
 
-    if (!notes.length) {
-      const empty = document.createElement("p");
-      empty.className = "empty";
-      empty.textContent = "Todavía no hay notas guardadas.";
+    if(!subset.length){
+      const empty=document.createElement("p");
+      empty.className="empty";
+      empty.textContent="Todavía no hay tareas. Agrega tu primera actividad.";
       list.appendChild(empty);
     }
 
-    notes.forEach(note => {
-      const item = document.createElement("div");
-      item.className = "item";
-
-      const content = document.createElement("span");
-      const title = document.createElement("strong");
-      title.textContent = note.title;
-
-      const body = document.createElement("p");
-      body.style.whiteSpace = "pre-wrap";
-      body.textContent = note.body;
-
-      content.append(title, body);
-
-      const del = document.createElement("button");
-      del.className = "delete";
-      del.textContent = "×";
-      del.setAttribute("aria-label", "Eliminar nota");
-      del.addEventListener("click", () => {
-        notes = notes.filter(n => n.id !== note.id);
-        saveUserData("notes", notes);
-        renderNotes();
+    subset.forEach(task=>{
+      const item=document.createElement("div");
+      item.className="item"+(task.done?" done":"");
+      const checkbox=document.createElement("input");
+      checkbox.type="checkbox";
+      checkbox.checked=!!task.done;
+      checkbox.setAttribute("aria-label","Marcar tarea como terminada");
+      checkbox.addEventListener("change",()=>{
+        task.done=checkbox.checked;
+        saveUserData("tasks",tasks);
+        renderTasks();
       });
 
-      item.append(content, del);
+      const label=document.createElement("span");
+      label.textContent=task.text;
+
+      const del=document.createElement("button");
+      del.className="delete";
+      del.textContent="×";
+      del.setAttribute("aria-label","Eliminar tarea");
+      del.addEventListener("click",()=>{
+        tasks=tasks.filter(t=>t.id!==task.id);
+        saveUserData("tasks",tasks);
+        renderTasks();
+      });
+
+      item.append(checkbox,label,del);
       list.appendChild(item);
     });
+  });
+}
+$("quickTaskForm").addEventListener("submit",event=>{
+  event.preventDefault();
+  addTask($("quickTask").value.trim());
+  $("quickTask").value="";
+});
+$("taskForm").addEventListener("submit",event=>{
+  event.preventDefault();
+  addTask($("taskInput").value.trim());
+  $("taskInput").value="";
+});
+
+// Notas locales separadas por usuario.
+function renderNotes(){
+  const list=$("notesList");
+  list.replaceChildren();
+
+  if(!notes.length){
+    const empty=document.createElement("p");
+    empty.className="empty";
+    empty.textContent="Todavía no hay notas guardadas.";
+    list.appendChild(empty);
   }
 
-  $("noteForm").addEventListener("submit", event => {
-    event.preventDefault();
+  notes.forEach(note=>{
+    const item=document.createElement("div");
+    item.className="item";
+    const content=document.createElement("span");
+    const title=document.createElement("strong");
+    title.textContent=note.title;
+    const body=document.createElement("p");
+    body.style.whiteSpace="pre-wrap";
+    body.textContent=note.body;
+    content.append(title,body);
 
-    notes.unshift({
-      id: Date.now() + Math.random(),
-      title: $("noteTitle").value.trim(),
-      body: $("noteBody").value.trim()
+    const del=document.createElement("button");
+    del.className="delete";
+    del.textContent="×";
+    del.setAttribute("aria-label","Eliminar nota");
+    del.addEventListener("click",()=>{
+      notes=notes.filter(n=>n.id!==note.id);
+      saveUserData("notes",notes);
+      renderNotes();
     });
-
-    saveUserData("notes", notes);
-    $("noteTitle").value = "";
-    $("noteBody").value = "";
-    renderNotes();
+    item.append(content,del);
+    list.appendChild(item);
   });
-
-  renderTasks();
+}
+$("noteForm").addEventListener("submit",event=>{
+  event.preventDefault();
+  if(!currentUserId){
+    alert("Inicia sesión para guardar notas.");
+    return;
+  }
+  notes.unshift({
+    id:Date.now()+Math.random(),
+    title:$("noteTitle").value.trim(),
+    body:$("noteBody").value.trim()
+  });
+  saveUserData("notes",notes);
+  $("noteTitle").value="";
+  $("noteBody").value="";
   renderNotes();
-  checkConnection();
-  setInterval(checkConnection, 30000);
+});
+
+renderTasks();
+renderNotes();
+showWelcomeMessages();
+checkConnection();
+setInterval(checkConnection,30000);
 </script>
 
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
-  import {
-    getAuth, onAuthStateChanged, signInWithEmailAndPassword,
-    createUserWithEmailAndPassword, GoogleAuthProvider,
-    signInWithPopup, signOut
-  } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+import {initializeApp} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+import {
+  getAuth,onAuthStateChanged,signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,GoogleAuthProvider,
+  signInWithPopup,signOut
+} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 
-  // Configuración de la aplicación web de Firebase del proyecto NOVA.
-  const firebaseConfig = {
-    apiKey: "AIzaSyCd-HLyx3Wot58N79xPcThgdlDiEq0LvcI",
-    authDomain: "nova-c80a7.firebaseapp.com",
-    projectId: "nova-c80a7",
-    storageBucket: "nova-c80a7.firebasestorage.app",
-    messagingSenderId: "338075635478",
-    appId: "1:338075635478:web:f93448b77661e130d88a37"
+const firebaseConfig={
+  apiKey:"AIzaSyCd-HLyx3Wot58N79xPcThgdlDiEq0LvcI",
+  authDomain:"nova-c80a7.firebaseapp.com",
+  projectId:"nova-c80a7",
+  storageBucket:"nova-c80a7.firebasestorage.app",
+  messagingSenderId:"338075635478",
+  appId:"1:338075635478:web:f93448b77661e130d88a37"
+};
+
+const overlay=document.getElementById("authOverlay");
+const appElement=document.getElementById("novaApp");
+const authForm=document.getElementById("authForm");
+const emailInput=document.getElementById("authEmail");
+const passwordInput=document.getElementById("authPassword");
+const authMessage=document.getElementById("authMessage");
+const emailAuthBtn=document.getElementById("emailAuthBtn");
+const googleAuthBtn=document.getElementById("googleAuthBtn");
+const authModeBtn=document.getElementById("authModeBtn");
+const authSwitchText=document.getElementById("authSwitchText");
+const logoutBtn=document.getElementById("logoutBtn");
+const accountEmail=document.getElementById("accountEmail");
+
+let creatingAccount=false;
+let auth;
+
+function showAuthError(error){
+  const messages={
+    "auth/invalid-credential":"Correo o contraseña incorrectos.",
+    "auth/user-not-found":"No existe una cuenta con ese correo.",
+    "auth/wrong-password":"La contraseña es incorrecta.",
+    "auth/email-already-in-use":"Ese correo ya tiene una cuenta. Inicia sesión.",
+    "auth/weak-password":"La contraseña debe tener al menos 6 caracteres.",
+    "auth/invalid-email":"Escribe un correo electrónico válido.",
+    "auth/popup-closed-by-user":"Se cerró la ventana de Google antes de terminar.",
+    "auth/unauthorized-domain":"Este dominio no está autorizado en Firebase Authentication."
+  };
+  authMessage.textContent=messages[error.code] ||
+    `No se pudo iniciar sesión (${error.code || "error"}). Revisa Firebase.`;
+}
+function setBusy(busy){
+  emailAuthBtn.disabled=busy;
+  googleAuthBtn.disabled=busy;
+  authModeBtn.disabled=busy;
+}
+authModeBtn.addEventListener("click",()=>{
+  creatingAccount=!creatingAccount;
+  document.getElementById("authTitle").textContent=creatingAccount?"Crear cuenta":"N.O.V.A.";
+  emailAuthBtn.textContent=creatingAccount?"Crear cuenta":"Iniciar sesión";
+  authSwitchText.textContent=creatingAccount?"¿Ya tienes cuenta?":"¿No tienes cuenta?";
+  authModeBtn.textContent=creatingAccount?"Iniciar sesión":"Crear cuenta";
+  passwordInput.autocomplete=creatingAccount?"new-password":"current-password";
+  authMessage.textContent="";
+});
+authForm.addEventListener("submit",async event=>{
+  event.preventDefault();
+  authMessage.textContent="";
+  setBusy(true);
+  try{
+    if(creatingAccount){
+      await createUserWithEmailAndPassword(auth,emailInput.value.trim(),passwordInput.value);
+    }else{
+      await signInWithEmailAndPassword(auth,emailInput.value.trim(),passwordInput.value);
+    }
+  }catch(error){
+    showAuthError(error);
+  }finally{
+    setBusy(false);
+  }
+});
+googleAuthBtn.addEventListener("click",async()=>{
+  authMessage.textContent="";
+  setBusy(true);
+  try{
+    await signInWithPopup(auth,new GoogleAuthProvider());
+  }catch(error){
+    showAuthError(error);
+  }finally{
+    setBusy(false);
+  }
+});
+logoutBtn.addEventListener("click",async()=>{
+  try{ await signOut(auth); }
+  catch(error){
+    console.error("No se pudo cerrar sesión:",error);
+    alert("No se pudo cerrar sesión. Inténtalo de nuevo.");
+  }
+});
+
+try{
+  const app=initializeApp(firebaseConfig);
+  auth=getAuth(app);
+  window.novaFirebaseGetIdToken=async()=>{
+    const user=auth.currentUser;
+    return user?user.getIdToken():null;
   };
 
-  const overlay = document.getElementById("authOverlay");
-  const appElement = document.getElementById("novaApp");
-  const authForm = document.getElementById("authForm");
-  const emailInput = document.getElementById("authEmail");
-  const passwordInput = document.getElementById("authPassword");
-  const authMessage = document.getElementById("authMessage");
-  const emailAuthBtn = document.getElementById("emailAuthBtn");
-  const googleAuthBtn = document.getElementById("googleAuthBtn");
-  const authModeBtn = document.getElementById("authModeBtn");
-  const authSwitchText = document.getElementById("authSwitchText");
-  const logoutBtn = document.getElementById("logoutBtn");
-  const accountEmail = document.getElementById("accountEmail");
-
-  let creatingAccount = false;
-  let auth;
-
-  function showAuthError(error) {
-    const messages = {
-      "auth/invalid-credential": "Correo o contraseña incorrectos.",
-      "auth/user-not-found": "No existe una cuenta con ese correo.",
-      "auth/wrong-password": "La contraseña es incorrecta.",
-      "auth/email-already-in-use": "Ese correo ya tiene una cuenta. Inicia sesión.",
-      "auth/weak-password": "La contraseña debe tener al menos 6 caracteres.",
-      "auth/invalid-email": "Escribe un correo electrónico válido.",
-      "auth/popup-closed-by-user": "Se cerró la ventana de Google antes de terminar.",
-      "auth/unauthorized-domain": "Este dominio no está autorizado en Firebase Authentication."
-    };
-    authMessage.textContent = messages[error.code] || `No se pudo iniciar sesión (${error.code || "error"}). Revisa la configuración de Firebase.`;
-  }
-
-  function setBusy(busy) {
-    emailAuthBtn.disabled = busy;
-    googleAuthBtn.disabled = busy;
-    authModeBtn.disabled = busy;
-  }
-
-  authModeBtn.addEventListener("click", () => {
-    creatingAccount = !creatingAccount;
-    document.getElementById("authTitle").textContent = creatingAccount ? "Crear cuenta" : "N.O.V.A.";
-    emailAuthBtn.textContent = creatingAccount ? "Crear cuenta" : "Iniciar sesión";
-    authSwitchText.textContent = creatingAccount ? "¿Ya tienes cuenta?" : "¿No tienes cuenta?";
-    authModeBtn.textContent = creatingAccount ? "Iniciar sesión" : "Crear cuenta";
-    passwordInput.autocomplete = creatingAccount ? "new-password" : "current-password";
-    authMessage.textContent = "";
-  });
-
-  authForm.addEventListener("submit", async (event) => {
-    event.preventDefault();
-    authMessage.textContent = "";
-    setBusy(true);
-    try {
-      if (creatingAccount) {
-        await createUserWithEmailAndPassword(auth, emailInput.value.trim(), passwordInput.value);
-      } else {
-        await signInWithEmailAndPassword(auth, emailInput.value.trim(), passwordInput.value);
-      }
-    } catch (error) {
-      showAuthError(error);
-    } finally {
-      setBusy(false);
+  onAuthStateChanged(auth,async user=>{
+    if(user){
+      overlay.hidden=true;
+      appElement.classList.add("auth-ready");
+      accountEmail.textContent=user.email || "Sesión iniciada";
+      accountEmail.title=user.email || "";
+      await window.novaSetUser?.(user.uid);
+    }else{
+      await window.novaSetUser?.(null);
+      overlay.hidden=false;
+      appElement.classList.remove("auth-ready");
+      accountEmail.textContent="";
+      accountEmail.title="";
     }
   });
-
-  googleAuthBtn.addEventListener("click", async () => {
-    authMessage.textContent = "";
-    setBusy(true);
-    try {
-      await signInWithPopup(auth, new GoogleAuthProvider());
-    } catch (error) {
-      showAuthError(error);
-    } finally {
-      setBusy(false);
-    }
-  });
-
-  logoutBtn.addEventListener("click", async () => {
-    try {
-      await signOut(auth);
-    } catch (error) {
-      console.error("No se pudo cerrar sesión:", error);
-      alert("No se pudo cerrar sesión. Inténtalo de nuevo.");
-    }
-  });
-
-  try {
-    const app = initializeApp(firebaseConfig);
-    auth = getAuth(app);
-    // El script principal obtiene el token actualizado desde esta función.
-    window.novaFirebaseGetIdToken = async () => {
-      const currentUser = auth.currentUser;
-      return currentUser ? currentUser.getIdToken() : null;
-    };
-
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        // Actualiza primero el UID y carga únicamente los datos de esta cuenta.
-        window.novaSetUser?.(user.uid);
-        overlay.hidden = true;
-        appElement.classList.add("auth-ready");
-        accountEmail.textContent = user.email || "Sesión iniciada";
-        accountEmail.title = user.email || "";
-      } else {
-        window.novaSetUser?.(null);
-        overlay.hidden = false;
-        appElement.classList.remove("auth-ready");
-        accountEmail.textContent = "";
-        accountEmail.title = "";
-      }
-    });
-  } catch (error) {
-    overlay.hidden = false;
-    authMessage.textContent = "No se pudo iniciar Firebase. Revisa que los seis valores de firebaseConfig sean correctos.";
-    console.error("Error al inicializar Firebase:", error);
-  }
+}catch(error){
+  overlay.hidden=false;
+  authMessage.textContent="No se pudo iniciar Firebase. Revisa la configuración de firebaseConfig.";
+  console.error("Error al inicializar Firebase:",error);
+}
 </script>
-
 </body>
 </html>
