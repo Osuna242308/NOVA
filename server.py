@@ -151,10 +151,11 @@ def chat(
 
     try:
         respuesta = procesar_comando(
-            datos.mensaje,
-            uid,
-            chat_id,
-        )
+    datos.mensaje,
+    uid,
+    chat_id,
+    datos.tasks,
+)
 
         return {
             "respuesta": str(respuesta),
