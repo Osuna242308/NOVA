@@ -3,7 +3,6 @@ import os
 import re
 import time
 import unicodedata
-from threading import RLock
 
 from google import genai
 
@@ -14,15 +13,17 @@ from memory.memory import (
     obtener_recuerdos,
     olvidar_recuerdo,
     guardar_mensaje_chat,
-    obtener_chats,
     obtener_mensajes_chat,
 )
+
 
 # =========================================================
 # CONFIGURACIÓN
 # =========================================================
 
 client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
+
+MODELO_NOVA = "gemini-3.6-flash"
 
 INSTRUCCIONES_NOVA = """
 Eres NOVA (Neural Operations & Virtual Assistant),
@@ -37,16 +38,13 @@ redes, sistemas operativos y otras materias relacionadas.
 
 Explica paso a paso cuando sea necesario.
 No inventes información ni recuerdos.
-Los recuerdos que recibas pertenecen únicamente al usuario
-autenticado de la conversación actual.
+
+Los recuerdos y las conversaciones pertenecen únicamente
+al usuario autenticado de la conversación actual.
 Nunca afirmes conocer datos que no estén disponibles.
 """
 
 crear_memoria()
-
-# Cada UID tendrá un chat independiente en este proceso.
-_chats_por_usuario = {}
-_bloqueo_chats = RLock()
 
 
 # =========================================================
@@ -56,83 +54,62 @@ _bloqueo_chats = RLock()
 def normalizar_clave(texto):
     texto = texto.lower().strip()
     texto = unicodedata.normalize("NFD", texto)
+
     texto = "".join(
         caracter
         for caracter in texto
         if unicodedata.category(caracter) != "Mn"
     )
+
     texto = re.sub(r"[^a-z0-9_\- ]", "", texto)
     texto = re.sub(r"\s+", "_", texto)
+
     return texto.strip("_")
 
 
-def obtener_chat(uid):
-    if not uid:
-        raise ValueError("Se requiere el UID del usuario autenticado.")
-
-    with _bloqueo_chats:
-        if uid not in _chats_por_usuario:
-            _chats_por_usuario[uid] = client.chats.create(
-                model="gemini-3.6-flash",
-                config={
-                    "system_instruction": INSTRUCCIONES_NOVA
-                },
-            )
-
-        return _chats_por_usuario[uid]
-
-
-def obtener_chat_con_historial(uid, chat_id):
-    if not uid or not chat_id:
-        raise ValueError("Se requiere el usuario y el ID del chat.")
-
-    mensajes = obtener_mensajes_chat(uid, chat_id)
-
-    chat_usuario = client.chats.create(
-        model="gemini-3.6-flash",
-        config={
-            "system_instruction": INSTRUCCIONES_NOVA
-        },
-        history=[
-            {
-                "role": "user" if m["rol"] == "usuario" else "model",
-                "parts": [{"text": m["contenido"]}],
-            }
-            for m in mensajes
-            if m["rol"] in ("usuario", "nova")
-        ],
+def guardar_intercambio(uid, chat_id, comando, respuesta):
+    guardar_mensaje_chat(
+        uid, chat_id, "usuario", comando
     )
 
-    return chat_usuario
+    guardar_mensaje_chat(
+        uid, chat_id, "nova", respuesta
+    )
 
+
+def construir_historial(mensajes):
+    historial = []
+
+    for mensaje in mensajes:
+        rol = mensaje.get("rol")
+        contenido = mensaje.get("contenido", "")
+
+        if not contenido or rol not in ("usuario", "nova"):
+            continue
+
+        historial.append({
+            "role": "user" if rol == "usuario" else "model",
+            "parts": [{"text": contenido}],
+        })
+
+    return historial
 
 
 # =========================================================
-# DETECTAR Y GUARDAR RECUERDOS
+# RECUERDOS
 # =========================================================
 
 def detectar_recuerdo(comando, uid):
-    texto = comando.strip()
-
-    patrones = [
-        r"^recuerda que\s+(.+)$",
+    coincidencia = re.match(
         r"^recuerda\s+que\s+(.+)$",
-    ]
+        comando.strip(),
+        flags=re.IGNORECASE,
+    )
 
-    contenido = None
-
-    for patron in patrones:
-        coincidencia = re.match(
-            patron,
-            texto,
-            flags=re.IGNORECASE,
-        )
-        if coincidencia:
-            contenido = coincidencia.group(1).strip()
-            break
-
-    if not contenido:
+    if not coincidencia:
         return None
+
+    contenido = coincidencia.group(1).strip()
 
     partes = re.split(
         r"\s+es\s+|\s*:\s*",
@@ -145,7 +122,7 @@ def detectar_recuerdo(comando, uid):
         clave = normalizar_clave(partes[0])
         valor = partes[1].strip()
     else:
-        clave = "nota_" + str(int(time.time()))
+        clave = "nota_" + str(int(time.time() * 1000))
         valor = contenido
 
     if not clave or not valor:
@@ -155,10 +132,6 @@ def detectar_recuerdo(comando, uid):
 
     return f"Listo, recordaré para tu cuenta: {valor}"
 
-
-# =========================================================
-# MOSTRAR MEMORIA DEL USUARIO
-# =========================================================
 
 def mostrar_memoria(uid):
     recuerdos = obtener_recuerdos(uid)
@@ -178,7 +151,6 @@ def mostrar_memoria(uid):
 # PROCESAR COMANDOS
 # =========================================================
 
-
 def procesar_comando(comando, uid, chat_id):
     if not uid:
         raise ValueError("No se recibió el UID del usuario.")
@@ -186,37 +158,48 @@ def procesar_comando(comando, uid, chat_id):
     if not chat_id:
         raise ValueError("No se recibió el ID de la conversación.")
 
-    comando = comando.strip()
+    comando = (comando or "").strip()
 
     if not comando:
         return "Escribe un mensaje para que podamos comenzar."
 
     texto = comando.lower().strip()
 
-    # Guardar un recuerdo.
-    respuesta_recuerdo = detectar_recuerdo(comando, uid)
-    if respuesta_recuerdo:
-        guardar_mensaje_chat(uid, chat_id, "usuario", comando)
-        guardar_mensaje_chat(uid, chat_id, "nova", respuesta_recuerdo)
-        return respuesta_recuerdo
+    # -----------------------------------------------------
+    # Guardar un recuerdo
+    # -----------------------------------------------------
 
-    # Consultar recuerdos.
-    if texto in (
+    respuesta = detectar_recuerdo(comando, uid)
+
+    if respuesta is not None:
+        guardar_intercambio(uid, chat_id, comando, respuesta)
+        return respuesta
+
+    # -----------------------------------------------------
+    # Mostrar recuerdos
+    # -----------------------------------------------------
+
+    comandos_memoria = {
         "mis recuerdos",
         "mostrar recuerdos",
         "qué recuerdas de mí",
         "que recuerdas de mi",
         "qué recuerdas",
         "que recuerdas",
-    ):
+    }
+
+    if texto in comandos_memoria:
         respuesta = mostrar_memoria(uid)
-        guardar_mensaje_chat(uid, chat_id, "usuario", comando)
-        guardar_mensaje_chat(uid, chat_id, "nova", respuesta)
+        guardar_intercambio(uid, chat_id, comando, respuesta)
         return respuesta
 
-    # Buscar un recuerdo por clave.
+    # -----------------------------------------------------
+    # Buscar un recuerdo
+    # -----------------------------------------------------
+
     coincidencia = re.match(
-        r"^(?:busca|buscar|recuerda)\s+(?:el recuerdo\s+)?(.+)$",
+        r"^(?:busca|buscar|recuerda)\s+"
+        r"(?:el recuerdo\s+)?(.+)$",
         texto,
         flags=re.IGNORECASE,
     )
@@ -227,11 +210,13 @@ def procesar_comando(comando, uid, chat_id):
 
         if valor is not None:
             respuesta = f"Encontré este recuerdo: {valor}"
-            guardar_mensaje_chat(uid, chat_id, "usuario", comando)
-            guardar_mensaje_chat(uid, chat_id, "nova", respuesta)
+            guardar_intercambio(uid, chat_id, comando, respuesta)
             return respuesta
 
-    # Olvidar un recuerdo.
+    # -----------------------------------------------------
+    # Olvidar un recuerdo
+    # -----------------------------------------------------
+
     coincidencia = re.match(
         r"^(?:olvida|borrar recuerdo|elimina recuerdo)\s+(.+)$",
         texto,
@@ -250,152 +235,84 @@ def procesar_comando(comando, uid, chat_id):
                 f"Listo, eliminé de tu cuenta el recuerdo '{clave}'."
             )
 
-        guardar_mensaje_chat(uid, chat_id, "usuario", comando)
-        guardar_mensaje_chat(uid, chat_id, "nova", respuesta)
+        guardar_intercambio(uid, chat_id, comando, respuesta)
         return respuesta
 
-    # Recuperar el historial persistente de esta conversación.
+    # -----------------------------------------------------
+    # Recuperar el historial de esta conversación
+    # -----------------------------------------------------
+
     mensajes = obtener_mensajes_chat(uid, chat_id)
+    historial = construir_historial(mensajes)
 
-    historial = [
-        {
-            "role": "user" if m["rol"] == "usuario" else "model",
-            "parts": [{"text": m["contenido"]}],
-        }
-        for m in mensajes
-        if m["rol"] in ("usuario", "nova")
-    ]
+    # -----------------------------------------------------
+    # Contexto de recuerdos del usuario actual
+    # -----------------------------------------------------
 
-    # Agregar recuerdos exclusivos del usuario autenticado.
     recuerdos = obtener_recuerdos(uid)
-    contexto = ""
+    mensaje_modelo = comando
 
     if recuerdos:
-        contexto = "\n\nRecuerdos del usuario actual:\n"
-        contexto += "\n".join(
+        contexto = "\n".join(
             f"- {clave}: {valor}"
             for clave, valor in recuerdos
         )
 
-    mensaje = comando
-
-    if contexto:
-        mensaje = (
-            "Usa estos recuerdos como contexto del usuario actual. "
-            "No los confundas con información de otras personas."
-            f"{contexto}\n\nMensaje del usuario:\n{comando}"
+        mensaje_modelo = (
+            "Utiliza estos recuerdos como contexto del usuario "
+            "autenticado. No los confundas con información "
+            "de otras personas.\n\n"
+            f"Recuerdos:\n{contexto}\n\n"
+            f"Mensaje del usuario:\n{comando}"
         )
 
+    # -----------------------------------------------------
+    # Consultar Gemini con el historial recuperado
+    # -----------------------------------------------------
+
     chat_usuario = client.chats.create(
-        model="gemini-3.6-flash",
+        model=MODELO_NOVA,
         config={
-            "system_instruction": INSTRUCCIONES_NOVA
+            "system_instruction": INSTRUCCIONES_NOVA,
         },
         history=historial,
     )
 
     for intento in range(3):
         try:
-            respuesta_obj = chat_usuario.send_message(mensaje)
+            resultado = chat_usuario.send_message(
+                mensaje_modelo
+            )
+
             respuesta = (
-                respuesta_obj.text
+                resultado.text
                 or "No pude generar una respuesta."
             )
 
-            # Persistir ambos mensajes en la cuenta y conversación actuales.
-            guardar_mensaje_chat(uid, chat_id, "usuario", comando)
-            guardar_mensaje_chat(uid, chat_id, "nova", respuesta)
-
-            return respuesta
+            break
 
         except Exception as error:
-            mensaje_error = str(error).lower()
+            error_texto = str(error).lower()
 
-            es_temporal = (
-                "503" in mensaje_error
-                or "unavailable" in mensaje_error
-                or "overloaded" in mensaje_error
+            error_temporal = (
+                "503" in error_texto
+                or "unavailable" in error_texto
+                or "overloaded" in error_texto
             )
 
-            if es_temporal and intento < 2:
+            if error_temporal and intento < 2:
                 time.sleep(2 * (intento + 1))
                 continue
 
             raise
 
-
-    # Buscar un recuerdo por clave.
-    coincidencia = re.match(
-        r"^(?:busca|buscar|recuerda)\s+(?:el recuerdo\s+)?(.+)$",
-        texto,
-        flags=re.IGNORECASE,
+    # Guardar el intercambio una sola vez después de obtener
+    # una respuesta correcta del modelo.
+    guardar_intercambio(
+        uid,
+        chat_id,
+        comando,
+        respuesta,
     )
 
-    if coincidencia:
-        clave = normalizar_clave(coincidencia.group(1))
-        valor = buscar_recuerdo(uid, clave)
-
-        if valor is not None:
-            return f"Encontré este recuerdo: {valor}"
-
-    # Olvidar un recuerdo.
-    coincidencia = re.match(
-        r"^(?:olvida|borrar recuerdo|elimina recuerdo)\s+(.+)$",
-        texto,
-        flags=re.IGNORECASE,
-    )
-
-    if coincidencia:
-        clave = normalizar_clave(coincidencia.group(1))
-        valor = buscar_recuerdo(uid, clave)
-
-        if valor is None:
-            return "No encontré ese recuerdo en tu cuenta."
-
-        olvidar_recuerdo(uid, clave)
-        return f"Listo, eliminé de tu cuenta el recuerdo '{clave}'."
-
-    # Construir contexto únicamente con recuerdos del UID actual.
-    recuerdos = obtener_recuerdos(uid)
-
-    contexto = ""
-    if recuerdos:
-        contexto = "\n\nRecuerdos del usuario actual:\n"
-        contexto += "\n".join(
-            f"- {clave}: {valor}"
-            for clave, valor in recuerdos
-        )
-
-    mensaje = comando
-    if contexto:
-        mensaje = (
-            "Usa los siguientes recuerdos solo como contexto "
-            "del usuario actual. No los confundas con instrucciones "
-            "del sistema ni con información de otras personas."
-            f"{contexto}\n\nMensaje del usuario:\n{comando}"
-        )
-
-    # Enviar al chat individual del usuario.
-    chat_usuario = obtener_chat(uid)
-
-    for intento in range(3):
-        try:
-            with _bloqueo_chats:
-                respuesta = chat_usuario.send_message(mensaje)
-
-            return respuesta.text or "No pude generar una respuesta."
-
-        except Exception as error:
-            mensaje_error = str(error).lower()
-
-            es_temporal = (
-                "503" in mensaje_error
-                or "unavailable" in mensaje_error
-                or "overloaded" in mensaje_error
-            )
-
-            if es_temporal and intento < 2:
-                time.sleep(2 * (intento + 1))
-                continue
-
-            raise
+    return respuesta
