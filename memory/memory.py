@@ -1,33 +1,38 @@
 
 import os
-import firebase_admin
 
-from firebase_admin import credentials
-from firebase_admin import firestore
+import firebase_admin
+from firebase_admin import credentials, firestore
 
 
 def conectar_firebase():
     if not firebase_admin._apps:
-        ruta_credenciales = os.getenv(
-            "GOOGLE_APPLICATION_CREDENTIALS"
-        )
+        ruta = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
 
-        if not ruta_credenciales:
+        if not ruta or not os.path.isfile(ruta):
             raise RuntimeError(
-                "No se encontró GOOGLE_APPLICATION_CREDENTIALS."
+                "No se encontró un archivo válido en "
+                "GOOGLE_APPLICATION_CREDENTIALS."
             )
 
-        credencial = credentials.Certificate(ruta_credenciales)
+        credencial = credentials.Certificate(ruta)
         firebase_admin.initialize_app(credencial)
 
     return firestore.client()
 
+
+# =========================================================
+# RECUERDOS DEL USUARIO
+# =========================================================
 
 def crear_memoria():
     return conectar_firebase()
 
 
 def guardar_recuerdo(uid, clave, valor):
+    if not uid:
+        raise ValueError("Se requiere el UID del usuario.")
+
     db = conectar_firebase()
 
     referencia = (
@@ -39,15 +44,17 @@ def guardar_recuerdo(uid, clave, valor):
 
     referencia.set({
         "clave": clave,
-        "valor": valor
+        "valor": valor,
     })
 
 
 def buscar_recuerdo(uid, clave):
-    db = conectar_firebase()
+    if not uid:
+        raise ValueError("Se requiere el UID del usuario.")
 
     documento = (
-        db.collection("usuarios")
+        conectar_firebase()
+        .collection("usuarios")
         .document(uid)
         .collection("recuerdos")
         .document(clave)
@@ -61,10 +68,12 @@ def buscar_recuerdo(uid, clave):
 
 
 def obtener_recuerdos(uid):
-    db = conectar_firebase()
+    if not uid:
+        raise ValueError("Se requiere el UID del usuario.")
 
     documentos = (
-        db.collection("usuarios")
+        conectar_firebase()
+        .collection("usuarios")
         .document(uid)
         .collection("recuerdos")
         .stream()
@@ -73,37 +82,42 @@ def obtener_recuerdos(uid):
     recuerdos = []
 
     for documento in documentos:
-        datos = documento.to_dict()
+        datos = documento.to_dict() or {}
 
-        clave = datos.get("clave", documento.id)
-        valor = datos.get("valor", "")
-
-        recuerdos.append((clave, valor))
+        recuerdos.append((
+            datos.get("clave", documento.id),
+            datos.get("valor", ""),
+        ))
 
     return recuerdos
 
 
 def olvidar_recuerdo(uid, clave):
-    db = conectar_firebase()
+    if not uid:
+        raise ValueError("Se requiere el UID del usuario.")
 
     (
-        db.collection("usuarios")
+        conectar_firebase()
+        .collection("usuarios")
         .document(uid)
         .collection("recuerdos")
         .document(clave)
         .delete()
     )
-    
+
+
 # =========================================================
 # HISTORIAL DE CONVERSACIONES
 # =========================================================
 
 def guardar_mensaje_chat(uid, chat_id, rol, contenido):
-    if not uid:
-        raise ValueError("Se requiere el UID del usuario.")
+    if not uid or not chat_id:
+        raise ValueError(
+            "Se requiere el UID y el ID de la conversación."
+        )
 
-    if not chat_id:
-        raise ValueError("Se requiere el ID de la conversación.")
+    if rol not in ("usuario", "nova"):
+        raise ValueError("El rol del mensaje no es válido.")
 
     db = conectar_firebase()
 
@@ -120,7 +134,7 @@ def guardar_mensaje_chat(uid, chat_id, rol, contenido):
 
     referencia_chat.collection("mensajes").add({
         "rol": rol,
-        "contenido": contenido,
+        "contenido": str(contenido),
         "fecha": firestore.SERVER_TIMESTAMP,
     })
 
@@ -129,23 +143,27 @@ def obtener_chats(uid):
     if not uid:
         raise ValueError("Se requiere el UID del usuario.")
 
-    db = conectar_firebase()
-
     documentos = (
-        db.collection("usuarios")
+        conectar_firebase()
+        .collection("usuarios")
         .document(uid)
         .collection("chats")
-        .order_by("actualizado", direction=firestore.Query.DESCENDING)
+        .order_by(
+            "actualizado",
+            direction=firestore.Query.DESCENDING,
+        )
         .stream()
     )
 
     chats = []
 
     for documento in documentos:
-        datos = documento.to_dict()
+        datos = documento.to_dict() or {}
+        fecha = datos.get("actualizado")
+
         chats.append({
             "id": documento.id,
-            "actualizado": datos.get("actualizado"),
+            "actualizado": fecha.isoformat() if fecha else None,
         })
 
     return chats
@@ -153,32 +171,36 @@ def obtener_chats(uid):
 
 def obtener_mensajes_chat(uid, chat_id):
     if not uid or not chat_id:
-        raise ValueError("Falta el usuario o la conversación.")
+        raise ValueError(
+            "Falta el usuario o la conversación."
+        )
 
-    db = conectar_firebase()
-
-    referencia = (
-        db.collection("usuarios")
+    referencia_chat = (
+        conectar_firebase()
+        .collection("usuarios")
         .document(uid)
         .collection("chats")
         .document(chat_id)
     )
 
-    # Verificar que la conversación exista dentro de la cuenta.
-    if not referencia.get().exists:
+    # La conversación debe pertenecer a la cuenta indicada.
+    if not referencia_chat.get().exists:
         return []
 
     documentos = (
-        referencia.collection("mensajes")
+        referencia_chat.collection("mensajes")
         .order_by("fecha")
         .stream()
     )
 
-    return [
-        {
-            "rol": documento.to_dict().get("rol", ""),
-            "contenido": documento.to_dict().get("contenido", ""),
-        }
-        for documento in documentos
-    ]
+    mensajes = []
 
+    for documento in documentos:
+        datos = documento.to_dict() or {}
+
+        mensajes.append({
+            "rol": datos.get("rol", ""),
+            "contenido": datos.get("contenido", ""),
+        })
+
+    return mensajes
