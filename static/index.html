@@ -387,13 +387,17 @@ async function sendMessage(inputId,buttonId){
     if(!token) throw new Error("Tu sesión expiró. Inicia sesión nuevamente.");
 
     const response=await fetch(API_URL+"/chat",{
-      method:"POST",
-      headers:{
-        "Content-Type":"application/json",
-        "Authorization":`Bearer ${token}`
-      },
-      body:JSON.stringify({mensaje:message,chat_id:chatIdForRequest})
-    });
+  method:"POST",
+  headers:{
+    "Content-Type":"application/json",
+    "Authorization":`Bearer ${token}`
+  },
+  body:JSON.stringify({
+    mensaje:message,
+    chat_id:chatIdForRequest,
+    tasks:tasks
+  })
+});
     const data=await response.json();
 
     if(!response.ok) throw new Error(data.detail || "No se pudo procesar el mensaje.");
