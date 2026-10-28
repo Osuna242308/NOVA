@@ -151,7 +151,7 @@ def mostrar_memoria(uid):
 # PROCESAR COMANDOS
 # =========================================================
 
-def procesar_comando(comando, uid, chat_id):
+def procesar_comando(comando, uid, chat_id, tasks=None):
     if not uid:
         raise ValueError("No se recibió el UID del usuario.")
 
