@@ -56,6 +56,7 @@ if STATIC_DIR.is_dir():
 
 class Mensaje(BaseModel):
     mensaje: str
+    chat_id: str | None = None
 
 
 @app.get("/", include_in_schema=False)
@@ -73,6 +74,7 @@ def inicio():
 @app.get("/health")
 def salud():
     return {"estado": "ok"}
+
 
 
 @app.post("/chat")
@@ -104,10 +106,23 @@ def chat(
         )
 
     try:
-        respuesta = procesar_comando(datos.mensaje, uid)
-        return {"respuesta": str(respuesta)}
-    except Exception:
-        print("Error al procesar el mensaje de NOVA.")
+        import uuid
+
+        chat_id = datos.chat_id or str(uuid.uuid4())
+
+        respuesta = procesar_comando(
+            datos.mensaje,
+            uid,
+            chat_id,
+        )
+
+        return {
+            "respuesta": str(respuesta),
+            "chat_id": chat_id,
+        }
+
+    except Exception as error:
+        print(f"Error al procesar el mensaje de NOVA: {error}")
         raise HTTPException(
             status_code=500,
             detail="No se pudo procesar el mensaje. Revisa los registros del servidor.",
