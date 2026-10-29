@@ -249,11 +249,7 @@ def procesar_comando(comando, uid, chat_id, tasks=None):
     # Contexto de recuerdos del usuario actual
     # -----------------------------------------------------
 
-        recuerdos = obtener_recuerdos(uid)
-
-    # -----------------------------------------------------
-    # Contexto de recuerdos del usuario actual
-    # -----------------------------------------------------
+    recuerdos = obtener_recuerdos(uid)
 
     mensaje_modelo = comando
 
@@ -297,6 +293,7 @@ def procesar_comando(comando, uid, chat_id, tasks=None):
         )
 
     mensaje_modelo += contexto_tareas
+
     # -----------------------------------------------------
     # Consultar Gemini con el historial recuperado
     # -----------------------------------------------------
@@ -337,8 +334,10 @@ def procesar_comando(comando, uid, chat_id, tasks=None):
 
             raise
 
-    # Guardar el intercambio una sola vez después de obtener
-    # una respuesta correcta del modelo.
+    # -----------------------------------------------------
+    # Guardar el intercambio una sola vez
+    # -----------------------------------------------------
+
     guardar_intercambio(
         uid,
         chat_id,
