@@ -254,6 +254,8 @@ def procesar_comando(comando, uid, chat_id, tasks=None):
 
         tareas_usuario = tasks or []
 
+        tareas_usuario = tasks or []
+
     tareas_pendientes = [
         tarea
         for tarea in tareas_usuario
