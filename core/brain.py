@@ -252,7 +252,6 @@ def procesar_comando(comando, uid, chat_id, tasks=None):
     recuerdos = obtener_recuerdos(uid)
     mensaje_modelo = comando
 
-        tareas_usuario = tasks or []
 
         tareas_usuario = tasks or []
 
