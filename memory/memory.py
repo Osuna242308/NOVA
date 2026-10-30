@@ -1,5 +1,6 @@
 
 import os
+import uuid
 
 import firebase_admin
 from firebase_admin import credentials, firestore
@@ -33,10 +34,9 @@ def guardar_recuerdo(uid, clave, valor):
     if not uid:
         raise ValueError("Se requiere el UID del usuario.")
 
-    db = conectar_firebase()
-
     referencia = (
-        db.collection("usuarios")
+        conectar_firebase()
+        .collection("usuarios")
         .document(uid)
         .collection("recuerdos")
         .document(clave)
@@ -104,6 +104,229 @@ def olvidar_recuerdo(uid, clave):
         .document(clave)
         .delete()
     )
+
+
+# =========================================================
+# TAREAS DEL USUARIO
+# =========================================================
+
+def obtener_tareas(uid):
+    if not uid:
+        raise ValueError("Se requiere el UID del usuario.")
+
+    documentos = (
+        conectar_firebase()
+        .collection("usuarios")
+        .document(uid)
+        .collection("tareas")
+        .stream()
+    )
+
+    tareas = []
+
+    for documento in documentos:
+        datos = documento.to_dict() or {}
+
+        tareas.append({
+            "id": documento.id,
+            "text": datos.get("text", ""),
+            "done": datos.get("done", False),
+        })
+
+    return tareas
+
+
+def crear_tarea(uid, texto):
+    if not uid:
+        raise ValueError("Se requiere el UID del usuario.")
+
+    texto = str(texto).strip()
+
+    if not texto:
+        raise ValueError("La tarea no puede estar vacía.")
+
+    tarea_id = str(uuid.uuid4())
+
+    (
+        conectar_firebase()
+        .collection("usuarios")
+        .document(uid)
+        .collection("tareas")
+        .document(tarea_id)
+        .set({
+            "text": texto,
+            "done": False,
+            "creada": firestore.SERVER_TIMESTAMP,
+        })
+    )
+
+    return {
+        "id": tarea_id,
+        "text": texto,
+        "done": False,
+    }
+
+
+def actualizar_tarea(uid, tarea_id, texto=None, done=None):
+    if not uid or not tarea_id:
+        raise ValueError("Se requiere el UID y el ID de la tarea.")
+
+    cambios = {}
+
+    if texto is not None:
+        texto = str(texto).strip()
+
+        if not texto:
+            raise ValueError("El texto de la tarea no puede estar vacío.")
+
+        cambios["text"] = texto
+
+    if done is not None:
+        cambios["done"] = bool(done)
+
+    if not cambios:
+        return
+
+    referencia = (
+        conectar_firebase()
+        .collection("usuarios")
+        .document(uid)
+        .collection("tareas")
+        .document(tarea_id)
+    )
+
+    if not referencia.get().exists:
+        raise ValueError("La tarea no existe.")
+
+    referencia.update(cambios)
+
+
+def eliminar_tarea(uid, tarea_id):
+    if not uid or not tarea_id:
+        raise ValueError("Se requiere el UID y el ID de la tarea.")
+
+    referencia = (
+        conectar_firebase()
+        .collection("usuarios")
+        .document(uid)
+        .collection("tareas")
+        .document(tarea_id)
+    )
+
+    if not referencia.get().exists:
+        raise ValueError("La tarea no existe.")
+
+    referencia.delete()
+
+
+# =========================================================
+# NOTAS DEL USUARIO
+# =========================================================
+
+def obtener_notas(uid):
+    if not uid:
+        raise ValueError("Se requiere el UID del usuario.")
+
+    documentos = (
+        conectar_firebase()
+        .collection("usuarios")
+        .document(uid)
+        .collection("notas")
+        .stream()
+    )
+
+    notas = []
+
+    for documento in documentos:
+        datos = documento.to_dict() or {}
+
+        notas.append({
+            "id": documento.id,
+            "title": datos.get("title", ""),
+            "body": datos.get("body", ""),
+        })
+
+    return notas
+
+
+def crear_nota(uid, titulo, contenido):
+    if not uid:
+        raise ValueError("Se requiere el UID del usuario.")
+
+    titulo = str(titulo).strip()
+    contenido = str(contenido).strip()
+
+    if not titulo and not contenido:
+        raise ValueError("La nota no puede estar vacía.")
+
+    nota_id = str(uuid.uuid4())
+
+    (
+        conectar_firebase()
+        .collection("usuarios")
+        .document(uid)
+        .collection("notas")
+        .document(nota_id)
+        .set({
+            "title": titulo,
+            "body": contenido,
+            "creada": firestore.SERVER_TIMESTAMP,
+        })
+    )
+
+    return {
+        "id": nota_id,
+        "title": titulo,
+        "body": contenido,
+    }
+
+
+def actualizar_nota(uid, nota_id, titulo=None, contenido=None):
+    if not uid or not nota_id:
+        raise ValueError("Se requiere el UID y el ID de la nota.")
+
+    cambios = {}
+
+    if titulo is not None:
+        cambios["title"] = str(titulo).strip()
+
+    if contenido is not None:
+        cambios["body"] = str(contenido).strip()
+
+    if not cambios:
+        return
+
+    referencia = (
+        conectar_firebase()
+        .collection("usuarios")
+        .document(uid)
+        .collection("notas")
+        .document(nota_id)
+    )
+
+    if not referencia.get().exists:
+        raise ValueError("La nota no existe.")
+
+    cambios["actualizada"] = firestore.SERVER_TIMESTAMP
+    referencia.update(cambios)
+
+
+def eliminar_nota(uid, nota_id):
+    if not uid or not nota_id:
+        raise ValueError("Se requiere el UID y el ID de la nota.")
+
+    referencia = (
+        conectar_firebase()
+        .collection("usuarios")
+        .document(uid)
+        .collection("notas")
+        .document(nota_id)
+    )
+
+    if not referencia.get().exists:
+        raise ValueError("La nota no existe.")
+
+    referencia.delete()
 
 
 # =========================================================
@@ -183,7 +406,6 @@ def obtener_mensajes_chat(uid, chat_id):
         .document(chat_id)
     )
 
-    # La conversación debe pertenecer a la cuenta indicada.
     if not referencia_chat.get().exists:
         return []
 
